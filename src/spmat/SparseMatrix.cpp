@@ -71,3 +71,75 @@ const double& SparseMatrix::operator[](array<int, 2>& a_index) const
   return m_data[row][col_index];
 }
 
+void SparseMatrix::zero()
+{
+
+  for (int row = 0; row < m_m; row ++)
+    {
+      for (int col = 0; col < m_colIndex[row].size(); col ++)
+        {
+          m_data[row][col] = 0.0;
+        }
+    }
+
+}
+
+SparseMatrix SparseMatrix::transpose() const
+{
+
+  SparseMatrix transposed = SparseMatrix(m_n, m_m);
+
+  for (int row = 0; row < m_m; row ++)
+    {
+      for (int col = 0; col < m_colIndex[row].size(); col ++)
+        {
+          array<int, 2> transposed_index = array<int, 2>{m_colIndex[row][col], row};
+          transposed[transposed_index] = m_data[row][col];
+        }
+    }
+
+  return transposed;
+}
+
+unsigned int SparseMatrix::M() const
+{
+  return m_m;
+}
+
+unsigned int SparseMatrix::N() const
+{
+  return m_m;
+}
+
+bool SparseMatrix::symmetric() const
+{
+
+  for (int row = 0; row < m_m; row ++)
+    {
+      for (int col = 0; col < m_colIndex[row].size(); col ++)
+        {
+          array<int, 2> transposed_index = array<int, 2>{col, row};
+          if (m_data[row][col] != (*this)[transposed_index]) return false;
+        }
+    }
+
+  return true;
+}
+
+
+
+void SparseMatrix::print() const
+{
+  printf("[");
+
+  for (int row = 0; row < m_m; row ++)
+    {
+      for (int col = 0; col < m_colIndex[row].size(); col ++)
+        {
+          printf("(%d, %d, %f), ", row, m_colIndex[row][col], m_data[row][col]);
+        }
+    }
+  printf("]\n");
+}
+
+
