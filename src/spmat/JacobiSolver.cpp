@@ -55,7 +55,7 @@ double Jacobi_helper(
   //else update a_phi for next iteration
   for (int indx = 0; indx < a_phi.size(); indx ++)
   {
-    a_phi[indx] = a_phi[indx] + lambda * La[indx];
+    a_phi[indx] = a_phi[indx] + lambda * residual[indx];
   }
 
   return Jacobi_helper(
