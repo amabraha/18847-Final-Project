@@ -90,7 +90,7 @@ void FEPoissonOperator::makeRHS(
           if (xn.isInterior())
             {
               //Using the pseudocode from page 22 of lecture 8. We know that Psi_n^h(centroid)=1/3 since it is piecewise linear
-              a_rhsAtNodes[xn.getInteriorNodeID()] += m_grid.elementArea(iEl)*a_FCentroids[iEl]*(1/3);
+              a_rhsAtNodes[xn.getInteriorNodeID()] += m_grid.elementArea(iEl)*a_FCentroids[iEl]*(1.0/3.0);
             }
         }
     }
