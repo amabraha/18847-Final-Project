@@ -49,7 +49,7 @@ double Jacobi_helper(
               norm(residual), 
               norm(residual)/norm(a_rhs), 
               a_curr_iter);
-      return norm(residual)/norm(a_rhs);
+      return norm(residual);
     }
 
   //else update a_phi for next iteration
@@ -75,11 +75,20 @@ double JacobiSolver::solve(
   const double& a_tolerance, 
   int a_iter)
 {
+  //check that A is square and a_rhs has same dimension
+  assert(a_A.M() == a_A.N());
+  assert(a_A.N() == a_rhs.size());
+
+  //resize a_phi to have same dimension
+  a_phi.resize(a_A.N());
+
+  //zero entries in a_phi
   for(int indx = 0; indx < a_phi.size(); indx ++)
     {
       a_phi[indx] = 0;
     }
 
+  //arbitrarily chosen from writeup
   double relaxation_parameter = 0.85;
 
   //compute max diagonal element in input matrix
@@ -91,6 +100,7 @@ double JacobiSolver::solve(
       if (max_Lkk < a_A[diag_indx]) max_Lkk = a_A[diag_indx];
     }
 
+  //call recursive helper
   return Jacobi_helper(
     a_phi,
     a_A, 
