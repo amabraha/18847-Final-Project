@@ -10,7 +10,7 @@ include $(HOME)/GNUmakefile
 CFLAGS += -O3
 #CFLAGS += -g
 
-fesolver.exe: GNUmakefile $(OBJS) FEmain.cpp
+fesolver.exe: GNUmakefile $(OBJS) FEMain.cpp
 	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)
 
 run: fesolver.exe 

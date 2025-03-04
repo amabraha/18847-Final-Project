@@ -67,8 +67,8 @@ const double& SparseMatrix::operator[](array<int, 2>& a_index) const
         }
     }
 
-  //you shouldn't be trying to access a const value of an entry that doesn't exist.
-  return m_data[row][col_index];
+  //since we aren't modifying our sparse matrix, just return 0.0
+  return m_zero;
 }
 
 void SparseMatrix::zero()
@@ -118,8 +118,12 @@ bool SparseMatrix::symmetric() const
     {
       for (int col = 0; col < m_colIndex[row].size(); col ++)
         {
+          array<int, 2> index = array<int, 2>{row, col};
           array<int, 2> transposed_index = array<int, 2>{col, row};
-          if (m_data[row][col] != (*this)[transposed_index]) return false;
+          if ((*this)[index] != (*this)[transposed_index]) 
+            {
+              return false;
+            }
         }
     }
 
