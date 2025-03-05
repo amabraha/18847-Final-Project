@@ -12,9 +12,9 @@ CXX = clang++
 
 CPPFLAGS = -D DIM=$(DIM) 
 
-ifeq ($(CXX) , clang++)
-CFLAGS += -stdlib=libc++
-endif
+#ifeq ($(CXX) , clang++)
+#CFLAGS += -stdlib=libc++
+#endif
 
 
 all: TestJacobi.exe

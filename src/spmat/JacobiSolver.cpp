@@ -45,11 +45,11 @@ double Jacobi_helper(
   //if we have converged or reached max number of iteratoins
   if (a_curr_iter == a_iter || norm(residual) <= a_tolerance * norm(a_rhs))
     {
-      printf("initial norm(rhs): %f\n final norm(residual)/norm(rhs): %f\n number iterations: %d\n", 
-              norm(residual), 
+      printf("initial norm(rhs): %f\nfinal norm(residual)/norm(rhs): %e\nnumber iterations: %d\n", 
+              norm(a_rhs), 
               norm(residual)/norm(a_rhs), 
               a_curr_iter);
-      return norm(residual);
+      return norm(residual)/norm(a_rhs);
     }
 
   //else update a_phi for next iteration
@@ -107,7 +107,7 @@ double JacobiSolver::solve(
     a_rhs, 
     a_tolerance,
     relaxation_parameter/max_Lkk,
-    0,
+    1,
     a_iter);
 
   

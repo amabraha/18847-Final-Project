@@ -12,9 +12,9 @@ CXX = clang++
 
 CPPFLAGS = -D DIM=$(DIM) 
 
-ifeq ($(CXX) , clang++)
-CFLAGS += -stdlib=libc++
-endif
+#ifeq ($(CXX) , clang++)
+#CFLAGS += -stdlib=libc++
+#endif
 
 
 all: TestMatrix.exe
@@ -27,7 +27,7 @@ all: TestMatrix.exe
 TestMatrix.exe: TestMatrix.cpp ../src/spmat/SparseMatrix.o
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o TestMatrix.exe TestMatrix.cpp ../src/spmat/SparseMatrix.o
 
-run:
+run: TestMatrix.exe
 	./TestMatrix.exe 10
 	./TestMatrix.exe 25
 	./TestMatrix.exe 46
