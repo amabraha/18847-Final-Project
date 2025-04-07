@@ -5,7 +5,7 @@
 #### Yao Xiao
 
 
-1. Integrate Triangle into FEGrid
+1. Integrate Triangle into FEGrid (Yao)
 2. Template FEPoissonOperator by data type
 3. Non-zero Dirichlet boundary conditions
 4. Demonstrate Piecewise Linear elements converge at 2nd order accuracy
