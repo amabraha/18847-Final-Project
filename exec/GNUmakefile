@@ -17,6 +17,9 @@ run: fesolver.exe
 	./fesolver.exe ../FEData/A
 	./fesolver.exe ../FEData/B.2
 
+poly: fesolver.exe 
+	./fesolver.exe ../FEData/test 2
+
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM *.vtk *.o *.d
 
