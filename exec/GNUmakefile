@@ -13,12 +13,15 @@ CFLAGS += -O3
 fesolver.exe: GNUmakefile $(OBJS) FEMain.cpp
 	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)
 
-fesolver_TD.exe: GNUmakefile $(OBJS) FEMain_TD.cpp
-	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver_TD.exe FEMain_TD.cpp  $(OBJS)
-
 run: fesolver.exe 
 	./fesolver.exe ../FEData/A
 	./fesolver.exe ../FEData/B.2
+
+fesolver_TD.exe: GNUmakefile $(OBJS) FEMain_TD.cpp
+	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver_TD.exe FEMain_TD.cpp  $(OBJS)
+
+run_TD: fesolver_TD.exe 
+	./fesolver_TD.exe ../FEData/A
 
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM *.vtk *.o *.d

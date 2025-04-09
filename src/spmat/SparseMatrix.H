@@ -16,6 +16,9 @@ public:
   /// copy constructor
   SparseMatrix(const SparseMatrix &M);
 
+  /// copy constructor with a multiplier of k
+  SparseMatrix(const SparseMatrix &M, double k);
+
   /// Matrix Vector multiply.  a_v.size()==N, returns vector of size M
   /** 
       Important: you should be able to perform matrix-vector multiplication by

@@ -12,6 +12,7 @@
 #include "FEPoissonOperator.H"
 #include "SparseMatrix.H"
 #include "JacobiSolver.H"
+#include "ReInsert.H"
 using namespace std;
 
 /**
@@ -30,6 +31,13 @@ class FETimeDependent
   void solve(double time, double dt, vector<double>& a_phi_out, 
              const vector<double>& a_initial_cond, const function<vector<double>(double)>& a_boundary_cond);
 
+  /// solves for phi(time) using time steps of <= dt
+  /// will populate a_phi_out with the output.
+  /// will also writes sequence vtk data to a_filenamei.vtk
+  void solve_write(double time, double dt, vector<double>& a_phi_out, 
+                   const vector<double>& a_initial_cond, const function<vector<double>(double)>& a_boundary_cond,
+                   FEGrid& a_grid, string a_filename);
+
   
 
 
@@ -37,6 +45,7 @@ class FETimeDependent
   SparseMatrix m_L;
   function<vector<double>(double)> m_f;
 
+  ///steps a_phi_out from time to time+dt
   void step(double time, double dt, vector<double>& a_phi_out);
 };
 #endif

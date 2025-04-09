@@ -1,5 +1,6 @@
 #include "FEGrid.H"
 #include "FEPoissonOperator.H"
+#include "FETimeDependent.H"
 #include "ReInsert.H"
 #include "JacobiSolver.H"
 #include <iostream>
@@ -71,7 +72,16 @@ int main(int argc, char** argv)
 
   FEWrite(&grid, &phi, "solution.vtk");
 
-  cout<<" Final Solver residual was "<<residual<<endl;
+  
+
+  vector<double> initial_conditions(internalNodes);
+
+  function<vector<double>(double)> rhs_f = [&rhs](double time) { return rhs;};
+  FETimeDependent TDsolver(op.matrix(), rhs_f);
+
+//   TDsolver.solve(1, .1, internalNodes, initial_conditions, rhs_f);
+  TDsolver.solve_write(100, .1, internalNodes, initial_conditions, rhs_f,
+                       grid, "solution");
   
   return 0;
   

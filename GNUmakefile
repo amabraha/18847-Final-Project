@@ -7,7 +7,7 @@ SPMAT_SRC = $(HOME)/src/spmat
 VISIT_SRC = $(HOME)/VisitWriter
 TIME_DEPENDENT_SRC = $(HOME)/src/fe_td
 VPATH = $(HOME) $(VISIT_SRC) $(FE_SRC) $(SPMAT_SRC)
-CFLAGS = -Wall -I$(FE_SRC) -I$(VISIT_SRC) -I$(SPMAT_SRC) -std=c++11
+CFLAGS = -Wall -I$(FE_SRC) -I$(VISIT_SRC) -I$(SPMAT_SRC) -I$(TIME_DEPENDENT_SRC) -std=c++11
 
 #CXX = g++
 CXX = clang++

@@ -24,6 +24,23 @@ SparseMatrix::SparseMatrix(const SparseMatrix &M)
   m_colIndex = M.m_colIndex;
 }
 
+SparseMatrix::SparseMatrix(const SparseMatrix &M, double k)
+{
+  m_m = M.m_m;
+  m_n = M.m_n;
+  m_zero = 0.0;
+  m_colIndex = M.m_colIndex;
+  m_data = M.m_data;
+
+  for (int row = 0; row < m_m; row ++)
+    {
+      for (int col = 0; col < m_colIndex[row].size(); col ++)
+        {
+          m_data[row][col] = M.m_data[row][col] * k;
+        }
+    }
+}
+
 vector<double> SparseMatrix::operator*(const vector<double>& a_v) const
 {
   vector<double> res = vector<double>(m_m, 0.0);
