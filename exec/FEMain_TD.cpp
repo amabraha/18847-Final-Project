@@ -7,7 +7,7 @@
 #include <array>
 using namespace std;
 
-float sourceFunction(array<double, DIM> x)
+float sourceFunction(double time, array<double, DIM> x)
 {
   double val=-.2;
   // region 1
@@ -34,54 +34,35 @@ int main(int argc, char** argv)
   FEGrid grid(nodeFile, eleFile);
 
   FEPoissonOperator op(grid);
-
-  const SparseMatrix& A = op.matrix(); 
-  if(!A.symmetric())
-    {
-      cout<<" error in matrix assembly.  This should be a symmetric matrix\n";
-      return 2;
-    }
-  array<int, 2> index = {{0,0}};
-  cout << index[0] << " , " << index[1] << endl;
-  
-  for(unsigned int i=0; i<A.M(); i++, index[0]++, index[1]++)
-    {
-      if(A[index] <=0)
-	{
-	  cout <<"negative or zero diagonal detected "<<index[0]<<endl;
-	}
-    }
-
-  int nElements = grid.getNumElts();
-  vector<double> sourceTerms(nElements);
-  array<double, DIM> centroid;
-  for(int i=0; i<nElements; i++)
-    {
-      centroid = grid.centroid(i);
-      sourceTerms[i] =sourceFunction(centroid);
-    }
-
-  vector<double> rhs, internalNodes, phi;
-  op.makeRHS(rhs, sourceTerms);
-
-  JacobiSolver solver;
-  int iterations = 1000;
-  double residual = solver.solve(internalNodes, op.matrix(), rhs, 1E-6, iterations);
-
-  reinsert(grid, internalNodes, phi);
-
-  FEWrite(&grid, &phi, "solution.vtk");
-
   
 
-  vector<double> initial_conditions(internalNodes);
+  vector<double> initial_conditions(grid.getNumInteriorNodes());
 
-  function<vector<double>(double)> rhs_f = [&rhs](double time) { return rhs;};
-  FETimeDependent TDsolver(op.matrix(), rhs_f);
+  function<vector<double>(double)> rhs_f = [&grid, &op](double time)
+  {
 
-//   TDsolver.solve(1, .1, internalNodes, initial_conditions, rhs_f);
-  TDsolver.solve_write(100, .1, internalNodes, initial_conditions, rhs_f,
-                       grid, "solution");
+    int nElements = grid.getNumElts();
+    vector<double> sourceTerms(nElements);
+
+    array<double, DIM> centroid;
+
+    for(int i=0; i<nElements; i++)
+    {
+    centroid = grid.centroid(i);
+    sourceTerms[i] = sourceFunction(time, centroid);
+    }
+  
+    vector<double> rhs;
+    op.makeRHS(rhs, sourceTerms);
+    return rhs;
+  };
+
+  FETimeDependent TDsolver(op.matrix(), rhs_f, grid);
+
+  vector<double> internalNodes;
+
+//   TDsolver.solve(10, .01, internalNodes, initial_conditions, rhs_f);
+  TDsolver.solve_write(10, .01, internalNodes, initial_conditions, rhs_f, "vtk_output/solution");
   
   return 0;
   

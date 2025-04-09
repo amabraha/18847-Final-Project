@@ -7,10 +7,11 @@ using namespace std;
 
 
 
-FETimeDependent::FETimeDependent(const SparseMatrix& a_L, const function<vector<double>(double)>& a_f)
+FETimeDependent::FETimeDependent(const SparseMatrix& a_L, const function<vector<double>(double)>& a_f, const FEGrid& a_grid)
 {
   m_L = a_L;
   m_f = a_f;
+  m_grid = a_grid;
 }
 
 void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out)
@@ -55,7 +56,7 @@ void FETimeDependent::solve(double time, double dt, vector<double>& a_phi_out,
 
 void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_out, 
                                   const vector<double>& a_initial_cond, const function<vector<double>(double)>& a_boundary_cond,
-                                  FEGrid& a_grid, string a_filename)
+                                  string a_filename)
 {
   //initialize our output to the initial condition
   a_phi_out.resize(a_initial_cond.size());
@@ -81,11 +82,10 @@ void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_
     }
 
     vector<double> phi_full;
-    reinsert(a_grid, a_phi_out, phi_full);
+    reinsert(m_grid, a_phi_out, phi_full);
 
     string filename = a_filename+to_string(file_counter)+".vtk";
-
-    FEWrite(&a_grid, &phi_full, filename.c_str());
+    FEWrite(&m_grid, &phi_full, filename.c_str());
     file_counter += 1;
 
   }

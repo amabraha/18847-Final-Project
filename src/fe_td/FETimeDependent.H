@@ -24,7 +24,7 @@ class FETimeDependent
  public:
   /// Construct solver from sparse matrix L and f
   /// f needs to be a function that takes in a time and returns a vector because it is time dependent
-  FETimeDependent(const SparseMatrix& a_L, const function<vector<double>(double)>& a_f);
+  FETimeDependent(const SparseMatrix& a_L, const function<vector<double>(double)>& a_f, const FEGrid& a_grid);
 
   /// solves for phi(time) using time steps of <= dt
   /// will populate a_phi_out with the output.
@@ -36,7 +36,7 @@ class FETimeDependent
   /// will also writes sequence vtk data to a_filenamei.vtk
   void solve_write(double time, double dt, vector<double>& a_phi_out, 
                    const vector<double>& a_initial_cond, const function<vector<double>(double)>& a_boundary_cond,
-                   FEGrid& a_grid, string a_filename);
+                   string a_filename);
 
   
 
@@ -44,6 +44,7 @@ class FETimeDependent
  private:
   SparseMatrix m_L;
   function<vector<double>(double)> m_f;
+  FEGrid m_grid;
 
   ///steps a_phi_out from time to time+dt
   void step(double time, double dt, vector<double>& a_phi_out);

@@ -21,8 +21,8 @@ fesolver_TD.exe: GNUmakefile $(OBJS) FEMain_TD.cpp
 	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver_TD.exe FEMain_TD.cpp  $(OBJS)
 
 run_TD: fesolver_TD.exe 
-	./fesolver_TD.exe ../FEData/A
+	./fesolver_TD.exe ../FEData/B.2
 
 clean:
-	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM *.vtk *.o *.d
+	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM vtk_output/*.vtk *.vtk *.o *.d
 
