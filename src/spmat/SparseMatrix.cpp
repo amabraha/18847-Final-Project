@@ -15,6 +15,15 @@ SparseMatrix::SparseMatrix(int a_M, int a_N)
   m_colIndex = vector<vector<int>>(a_M, vector<int>(0));
 }
 
+SparseMatrix::SparseMatrix(const SparseMatrix &M)
+{
+  m_m = M.m_m;
+  m_n = M.m_n;
+  m_zero = 0.0;
+  m_data = M.m_data;
+  m_colIndex = M.m_colIndex;
+}
+
 vector<double> SparseMatrix::operator*(const vector<double>& a_v) const
 {
   vector<double> res = vector<double>(m_m, 0.0);
@@ -52,6 +61,11 @@ double& SparseMatrix::operator[](array<int, 2>& a_index)
   return m_data[row][col_index];
 }
 
+double& SparseMatrix::access(array<int, 2> a_index)
+{
+  return (*this)[a_index];
+}
+
 const double& SparseMatrix::operator[](array<int, 2>& a_index) const
 {
   int row = a_index[0];
@@ -69,6 +83,11 @@ const double& SparseMatrix::operator[](array<int, 2>& a_index) const
 
   //since we aren't modifying our sparse matrix, just return 0.0
   return m_zero;
+}
+
+const double& SparseMatrix::access(array<int, 2> a_index) const
+{
+  return (*this)[a_index];
 }
 
 void SparseMatrix::zero()

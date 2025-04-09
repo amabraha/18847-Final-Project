@@ -13,6 +13,9 @@ public:
   SparseMatrix();
   SparseMatrix(int a_M, int a_N);
 
+  /// copy constructor
+  SparseMatrix(const SparseMatrix &M);
+
   /// Matrix Vector multiply.  a_v.size()==N, returns vector of size M
   /** 
       Important: you should be able to perform matrix-vector multiplication by
@@ -33,9 +36,11 @@ public:
     element of the array using push_back, in light of the comment above.
   */
   double& operator[](array<int, 2>& a_index);
+  double& access(array<int, 2> a_index);
 
   ///accessor function just to get a value
   const double& operator[](array<int, 2>& a_index) const;
+  const double& access(array<int, 2> a_index) const;
 
   /// zero out all the elements, but leave the sparse structure in place.
   void zero();

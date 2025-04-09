@@ -5,6 +5,7 @@ DIM = 2
 FE_SRC = $(HOME)/src/fe
 SPMAT_SRC = $(HOME)/src/spmat
 VISIT_SRC = $(HOME)/VisitWriter
+TIME_DEPENDENT_SRC = $(HOME)/src/fe_td
 VPATH = $(HOME) $(VISIT_SRC) $(FE_SRC) $(SPMAT_SRC)
 CFLAGS = -Wall -I$(FE_SRC) -I$(VISIT_SRC) -I$(SPMAT_SRC) -std=c++11
 
@@ -18,10 +19,12 @@ CPPFLAGS = -D DIM=$(DIM)
 
 FE_SRCFILES:= $(wildcard $(FE_SRC)/*.cpp)
 SPMAT_SRCFILES:= $(wildcard $(SPMAT_SRC)/*.cpp)
+TIME_DEPENDENT_SRCFILES := $(wildcard $(TIME_DEPENDENT_SRC)/*.cpp)
 FE_OBJS:=$(patsubst %.cpp, %.o, $(FE_SRCFILES))
 SPMAT_OBJS:=$(patsubst %.cpp, %.o, $(SPMAT_SRCFILES))
+TIME_DEPENDENT_OBJS:=$(patsubst %.cpp, %.o, $(TIME_DEPENDENT_SRCFILES))
 VISIT_OBJS := $(VISIT_SRC)/VisitWriter.o
-OBJS = $(FE_OBJS) $(SPMAT_OBJS) $(VISIT_OBJS)
+OBJS = $(FE_OBJS) $(SPMAT_OBJS) $(VISIT_OBJS) $(TIME_DEPENDENT_OBJS)
 
 %.o:%.cpp GNUmakefile
 	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
