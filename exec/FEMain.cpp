@@ -20,15 +20,30 @@ float sourceFunction(array<double, DIM> x)
 
 int main(int argc, char** argv)
 {
-  if(argc > 3)
+  // Parse command line arguments
+  if(argc < 2 || argc > 4)
     {
-      cout << "this program takes one argument that is the .node and .ele OR .poly and max area";
-      cout << "file prefix"<<endl;
+      cout << "Usage:" << endl;
+      cout << "  " << argv[0] << " <prefix> [max_area] [--extrude]" << endl;
       return 1;
     }
-  FEGrid grid;
+
   string prefix(argv[1]);
-  if (argc == 2)
+  bool extrude = false;
+  double max_area = -1.0;
+
+  if (argc >= 3) {
+    string arg2 = argv[2];
+    if (arg2 == "--extrude") {
+      extrude = true;
+    } else {
+      max_area = stod(arg2);
+    }
+  }
+
+
+  FEGrid grid;
+  if (argc == 2 || (argc == 3 && extrude))
   {
     string nodeFile = prefix+".node";
     string eleFile  = prefix+".ele";
@@ -37,7 +52,6 @@ int main(int argc, char** argv)
   } else
   {
     string polyFile = prefix+".poly";
-    double max_area = stod(argv[2]);
     
     grid = FEGrid(polyFile, max_area);
   }

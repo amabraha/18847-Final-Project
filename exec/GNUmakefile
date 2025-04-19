@@ -10,12 +10,18 @@ include $(HOME)/GNUmakefile
 CFLAGS += -O3
 #CFLAGS += -g
 
+# fesolver2d.exe: GNUmakefile $(OBJS) FEMain.cpp
+# 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver2d.exe FEMain.cpp  $(OBJS)
+
 fesolver.exe: GNUmakefile $(OBJS) FEMain.cpp
-	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)
+	$(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)
 
 run: fesolver.exe 
 	./fesolver.exe ../FEData/A
 	./fesolver.exe ../FEData/B.2
+
+extrude: fesolver.exe 
+	./fesolver.exe ../FEData/B.2 --extrude
 
 poly: fesolver.exe 
 	./fesolver.exe ../FEData/test 2

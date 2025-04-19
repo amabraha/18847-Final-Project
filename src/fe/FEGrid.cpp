@@ -29,12 +29,13 @@ FEGrid::FEGrid(const std::string& a_nodeFileName, const std::string& a_elementFi
   nodes>>ncount>>dim>>attributes>>boundaryMarkers;
   //cout<<ncount<<" "<<dim<<" "<<endl;
 
+  // read nodes
   m_nodes.resize(ncount);
   m_numInteriorNodes= 0;
   for(int i=0; i<ncount; i++)
     {
       int vertex, type;
-      array<double, DIM> x;
+      array<double, DIM> x = {0.0};
       nodes>>vertex>>x[0]>>x[1]>>type;
       vertex--;
       if(type == 1)
@@ -47,17 +48,48 @@ FEGrid::FEGrid(const std::string& a_nodeFileName, const std::string& a_elementFi
 	  m_numInteriorNodes++;
 	}
     }
- 
+  
+  // read elements
   ifstream elements(a_elementFileName.c_str());
   int ncell, nt;
   elements>>ncell>>nt>>attributes;
   array<int, VERTICES> vert;
   m_elements.resize(ncell);
+  if (DIM == 3) 
+      { 
+        cout<<"DIM 3"<<endl;
+      };
   for(int i=0; i<ncell; i++)
     {
       int cellID;
       elements>>cellID>>vert[0]>>vert[1]>>vert[2];
+      // 1-based indexing
       vert[0]--; vert[1]--; vert[2]--;
+      // 2d extrude into 3d, add apex point
+      if (DIM == 3) 
+      {
+        int vertex = m_nodes.size();
+        m_nodes.resize(vertex + 1);
+        array<double, DIM> x;
+        array<double, DIM> x_a = m_nodes[vert[0]].getPosition();
+        array<double, DIM> x_b = m_nodes[vert[1]].getPosition();
+        array<double, DIM> x_c = m_nodes[vert[2]].getPosition();
+
+        // Compute centroid
+        x[0] = (x_a[0] + x_b[0] + x_c[0]) / 3.0;
+        x[1] = (x_a[1] + x_b[1] + x_c[1]) / 3.0;
+
+        // Compute area (cross product)
+        double area = 0.5 * fabs((x_b[0]-x_a[0])*(x_c[1]-x_a[1])-(x_c[0]-x_a[0])*(x_b[1] - x_a[1]));
+
+        // Compute height to preserve h: the 3D tetrahedron volumes have a cube root equivalent to the square root of the original 2D elements
+        x[2] = 3.0 * sqrt(area);
+
+        // Add apex node as boundary node
+        m_nodes[vertex] = Node(x, -1, false);
+        vert[3] = vertex;
+      }
+
       cellID--;
       m_elements[cellID] = Element(vert);
     }
@@ -83,9 +115,11 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   }
 
   // Read the vertices: build up pointlist
+  // header of poly file
   int ncount, dim, attributes, boundaryMarkers;
   poly>>ncount>>dim>>attributes>>boundaryMarkers;
-  
+
+  // initialize data structures
   in.numberofpoints = ncount;
   in.numberofpointattributes = attributes;
   in.pointlist = (REAL *) malloc(in.numberofpoints * 2 * sizeof(REAL));
@@ -104,20 +138,24 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
     in.pointmarkerlist = (int *) NULL;
   }
 
+  // body
   for(int i=0; i<ncount; i++)
     {
       int vertex;
       double x, y;
       poly>>vertex>>x>>y;
       vertex--;
+      // read position
       in.pointlist[vertex*2] = x;
       in.pointlist[vertex*2+1] = y;
 
+      // read attributes
       for (int j = 0; j < in.numberofpointattributes; j++)
       {
         poly>>in.pointattributelist[vertex*in.numberofpointattributes + j];
       }
 
+      // read boundary marker
       if (boundaryMarkers > 0) {
         poly>>in.pointmarkerlist[vertex];
       }
@@ -127,7 +165,9 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   
   // Read the segments: build up segment list
   int segcount, segboundaryMarkers;
+  // header
   poly>>segcount>>segboundaryMarkers;
+  // initialize data structures
   in.numberofsegments = segcount;
   in.segmentlist = (int *) malloc(in.numberofsegments * 2 * sizeof(int));
   if (segboundaryMarkers > 0) {
@@ -136,18 +176,22 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   {
     in.segmentmarkerlist = (int *) NULL;
   }
+  // body
   for(int i=0; i<segcount; i++)
     {
       int segID, endpoint1, endpoint2;
       poly>>segID>>endpoint1>>endpoint2;
       segID--;
+      // read boundary marker
       if (segboundaryMarkers > 0) {
         poly>>in.segmentmarkerlist[segID];
       }
+      // read segment endpoints (node ID)
       in.segmentlist[segID*2] = endpoint1;
       in.segmentlist[segID*2+1] = endpoint2;
     }
   
+  // Read the holes
   int holecount;
   poly>>holecount;
   in.numberofholes = holecount;
@@ -211,13 +255,38 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
     {
       int cellID = i;
       array<int, VERTICES> vert;
+      // read vertices (node ID)
       vert[0] = out.trianglelist[cellID*3] - 1; // 1-based indexing
       vert[1] = out.trianglelist[cellID*3+1] - 1;
       vert[2] = out.trianglelist[cellID*3+2] - 1;
+      // 2d extrude into 3d, add apex point
+      if (DIM == 3) 
+      {
+        int vertex = m_nodes.size();
+        m_nodes.resize(vertex + 1);
+        array<double, DIM> x;
+        array<double, DIM> x_a = m_nodes[vert[0]].getPosition();
+        array<double, DIM> x_b = m_nodes[vert[1]].getPosition();
+        array<double, DIM> x_c = m_nodes[vert[2]].getPosition();
+
+        // Compute centroid
+        x[0] = (x_a[0] + x_b[0] + x_c[0]) / 3.0;
+        x[1] = (x_a[1] + x_b[1] + x_c[1]) / 3.0;
+
+        // Compute 2D area (cross product of vectors)
+        double area = 0.5 * fabs((x_b[0]-x_a[0])*(x_c[1]-x_a[1])-(x_c[0]-x_a[0])*(x_b[1] - x_a[1]));
+
+        // Compute height to preserve h: the 3D tetrahedron volumes have a cube root equivalent to the square root of the original 2D elements
+        x[2] = 3.0 * sqrt(area);
+
+        // Add apex node as boundary node
+        m_nodes[vertex] = Node(x, -1, false);
+        vert[3] = vertex;
+      }
       m_elements[cellID] = Element(vert);
     }
 
-  // free all allocated arrays
+  // Clean up
   free(in.pointlist);
   free(in.pointattributelist);
   if (boundaryMarkers > 0) {
@@ -249,26 +318,44 @@ array<double, DIM> FEGrid::gradient(
   struct xb {
     double x[DIM];
   };
-  array<double, 2> xbase = n.getPosition();
+  array<double, DIM> xbase = n.getPosition();
   array< array<double, DIM> , VERTICES-1> dx;
   for (int ivert = 0;ivert < VERTICES-1; ivert++)
     {
-      int otherNodeNumber = e[(a_nodeNumber + ivert+1)%VERTICES];
+      // Build vectors to other nodes of the element
+      int otherNodeNumber = e[(a_nodeNumber + ivert + 1)%VERTICES];
       dx[ivert] = m_nodes[otherNodeNumber].getPosition();
       for (int idir = 0;idir < DIM;idir++)
         {
           dx[ivert][idir] -=xbase[idir];
         }
     }        
-      // WARNING: the following calculation is correct for triangles in 2D *only*.
-  double det = dx[0][0]*dx[1][1] - dx[1][0]*dx[0][1];
-  array<double, DIM> retval;
-  
-  retval[0] = (-(dx[1][1] - dx[0][1])/det);
-  retval[1] = (-(dx[1][0] - dx[0][0])/det);
-  return retval;
-
+  if (DIM == 2) {
+    // WARNING: the following calculation is correct for triangles in 2D *only*.
+    // Determinant (cross product magnitude, 2*area)
+    double det = dx[0][0]*dx[1][1] - dx[1][0]*dx[0][1];
+    array<double, DIM> retval;
+    // Solve for gradient
+    retval[0] = (-(dx[1][1] - dx[0][1])/det);
+    retval[1] = (-(dx[1][0] - dx[0][0])/det);
+    return retval;
+  } 
+  else {
+    // Tetrahedrons in 3D
+    assert(DIM==3);
+    // Determinant (dot product, cross product, 6*volume)
+    double det = dx[0][0]*(dx[1][1]*dx[2][2]-dx[1][2]*dx[2][1]) 
+                - dx[0][1]*(dx[1][0]*dx[2][2]-dx[1][2]*dx[2][0])
+                + dx[0][2]*(dx[1][0]*dx[2][1]-dx[1][1]*dx[2][0]);
+    // Solve for gradient in 3D
+    array<double, DIM> retval;
+    retval[0] = (-(dx[1][1]*dx[2][2] - dx[1][2]*dx[2][1]) / det);
+    retval[1] = (-(dx[1][0]*dx[2][2] - dx[1][2]*dx[2][0]) / det);
+    retval[2] = (-(dx[1][0]*dx[2][1] - dx[1][1]*dx[2][0]) / det);
+    return retval;
+  }
 };
+
 array<double, DIM> FEGrid::centroid(const int& a_eltNumber) const
 {
   const Element& e =m_elements[a_eltNumber];
@@ -293,6 +380,8 @@ array<double, DIM> FEGrid::centroid(const int& a_eltNumber) const
     }
   return retval;
 }
+
+
 double FEGrid::elementArea(const int& a_eltNumber) const
 {
   const Element& e = m_elements[a_eltNumber];
@@ -308,9 +397,20 @@ double FEGrid::elementArea(const int& a_eltNumber) const
           dx[ivert-1][idir] -=xbase[idir];
         }
     }        
-  // WARNING: the following calculation is correct for triangles in 2D *only*.
-  double area = fabs(dx[0][0]*dx[1][1] - dx[1][0]*dx[0][1])/2;
-  return area;
+  if (DIM == 2) 
+  {
+    // WARNING: the following calculation is correct for triangles in 2D *only*.
+    double area = fabs(dx[0][0]*dx[1][1] - dx[1][0]*dx[0][1])/2.0;
+    return area;
+  } else 
+  {
+    assert(DIM == 3);
+    // Calculate volume for 3D tetrahedron (absolute value of Determinant / 6)
+    double volume = fabs(dx[0][0]*(dx[1][1]*dx[2][2]-dx[1][2]*dx[2][1]) 
+                - dx[0][1]*(dx[1][0]*dx[2][2]-dx[1][2]*dx[2][0])
+                + dx[0][2]*(dx[1][0]*dx[2][1]-dx[1][1]*dx[2][0]))/6.0;
+    return volume;
+  }
 }
 
 // double FEGrid::elementValue(const int& a_eltNumber,
@@ -397,6 +497,7 @@ const char* FEWrite(FEGrid* a_grid, vector<double>* a_scalarField, const char* a
   int centering[1] = {1};
   const char * const varnames[] = { "nodeData" };
   
+  // Always 3d coordinates
   vector<float> pts(3*nNodes);
   for(int i=0; i<nNodes; i++)
     {
@@ -404,19 +505,33 @@ const char* FEWrite(FEGrid* a_grid, vector<double>* a_scalarField, const char* a
       array<double, DIM> x = a_grid->node(i).getPosition();
       pts[p] = x[0];
       pts[p+1]=x[1];
-      pts[p+2]=0.0;
+      if (DIM == 2) 
+      {
+        pts[p+2]=0.0;
+      }
+      else {
+        pts[p+2] = x[2];
+      }
     }
 
   int ncell = a_grid->getNumElts();
-  vector<int> cellType(ncell, VISIT_TRIANGLE);
-  vector<int> conns(3*ncell);
+  vector<int> cellType;
+  if (DIM == 2) {
+    // 2D: 3 points per element
+    cellType.resize(ncell, VISIT_TRIANGLE);
+  } else {
+    // 3D: 4 points per element
+    cellType.resize(ncell, VISIT_TETRA);
+  }
+
+  vector<int> conns(VERTICES*ncell);
   for(int i=0; i<ncell; i++)
     {
       array<int, VERTICES> vertices = a_grid->element(i).vertices();
-      int e=3*i;
-      conns[e] = vertices[0];
-      conns[e+1]=vertices[1];
-      conns[e+2]=vertices[2];
+      int e = VERTICES * i;
+      for (int j = 0; j < VERTICES; j++) {
+        conns[e + j] = vertices[j];
+      }
     }
 
   write_unstructured_mesh(a_filename, 0, nNodes, &(pts[0]), ncell, 

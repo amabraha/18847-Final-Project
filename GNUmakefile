@@ -1,7 +1,7 @@
 #our makefile variables.   Good to place commonly changed variables
 # at the top of your makefile. Then follow with your rules.
 
-DIM = 2
+DIM = 3
 FE_SRC = $(HOME)/src/fe
 SPMAT_SRC = $(HOME)/src/spmat
 VISIT_SRC = $(HOME)/VisitWriter
@@ -11,7 +11,7 @@ CFLAGS = -Wall -I$(FE_SRC) -I$(VISIT_SRC) -I$(SPMAT_SRC) -I$(TRIANGLE_SRC) -std=
 
 CXX = g++
 # CXX = clang++
-CPPFLAGS = -D DIM=$(DIM) 
+CPPFLAGS = -DDIM=$(DIM) 
 
 #ifeq ($(CXX) , clang++)
 #CFLAGS += -stdlib=libc++

@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 #include "Node.H"
@@ -19,47 +20,37 @@ double dotprod(array<double, DIM> x, array<double, DIM> y)
 FEPoissonOperator::FEPoissonOperator(const FEGrid& a_grid)
 {
   m_grid = a_grid;
+  /// Build the sparse matrix L
   m_matrix = SparseMatrix(m_grid.getNumInteriorNodes(), m_grid.getNumInteriorNodes());
-
-  //loop through each element
-  for(int iEl = 0; iEl < m_grid.getNumElts(); iEl ++)
+  /// Iterate interior node pairs in elements
+  for (int ele_id = 0; ele_id < m_grid.getNumElts(); ele_id++)
+  {
+    for (int local_node_i = 0; local_node_i < VERTICES; local_node_i++)
     {
-      //access element with id iEl
-      const Element& e = m_grid.element(iEl);
-
-      //loop through the local vertices of element e
-      for(int iVert = 0; iVert < VERTICES; iVert ++)
+      Node node_i = m_grid.getNode(ele_id, local_node_i);
+      /// Check is interior
+      if (node_i.isInterior())
+      {
+        array<double, DIM> gradient_i = m_grid.gradient(ele_id, local_node_i);
+        for (int local_node_j = 0; local_node_j < VERTICES; local_node_j++)
         {
-          //xn and xm are a pair of adjacent vertices in element e
-          const Node& xn = m_grid.node(e[iVert]);
-          const Node& xm = m_grid.node(e[(iVert+1) % VERTICES]);
-
-          //we will separately populate matrix entries of the form L_{n,n} and entries of the form L_{m,n} (where m,n are distinct)
-
-          //we only populate L_{n,n} if xn is interior
-          if (xn.isInterior())
+          Node node_j = m_grid.getNode(ele_id, local_node_j);
+          if (node_j.isInterior())
+          {
+            array<double, DIM> gradient_j = m_grid.gradient(ele_id, local_node_j);
+            double inner_product = 0;
+            for (int dim = 0; dim < DIM; dim++)
             {
-              array<int, 2> sparse_matrix_indx = array<int, 2>{xn.getInteriorNodeID(), xn.getInteriorNodeID()};
-
-              //using the pseudocode in page 21 of lecture 8, we know the gradients are constant,
-              // so integrating over Ke is the same as multiplying with the area of Ke
-              m_matrix[sparse_matrix_indx] += m_grid.elementArea(iEl)*dotprod(m_grid.gradient(iEl, iVert), m_grid.gradient(iEl, iVert));
+              inner_product += gradient_i[dim] * gradient_j[dim];
             }
-
-          //we only populate L_{n,m} if xn and xm are interior
-          if (xn.isInterior() && xm.isInterior())
-            {
-              //we will simultaneously update L_{n,m} and L_{m,n} since L is symmetric
-              array<int, 2> sparse_matrix_indx = array<int, 2>{xn.getInteriorNodeID(), xm.getInteriorNodeID()};
-              array<int, 2> sparse_matrix_indx_trans = array<int, 2>{sparse_matrix_indx[1], sparse_matrix_indx[0]};
-
-              //using the pseudocode in page 21 of lecture 8, we know the gradients are constant,
-              // so integrating over Ke is the same as multiplying with the area of Ke
-              m_matrix[sparse_matrix_indx] += m_grid.elementArea(iEl)*dotprod(m_grid.gradient(iEl, iVert), m_grid.gradient(iEl, (iVert+1) % VERTICES));
-              m_matrix[sparse_matrix_indx_trans] = m_matrix[sparse_matrix_indx];
-            }
+            /// Fill up matrix incrementally
+            array<int, 2> index = {node_i.getInteriorNodeID(), node_j.getInteriorNodeID()};
+            m_matrix[index] += inner_product * m_grid.elementArea(ele_id);
+          }
         }
+      }
     }
+  }
 }
 
 void FEPoissonOperator::makeRHS(
