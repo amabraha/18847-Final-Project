@@ -12,6 +12,6 @@
 5. Implement a time-dependent FEM solver (Alan)
 6. Verify correct time-dependent behavior
 7. Create time-dependent animations of interesting source terms and boundary conditions
-8. Extrude the 2D elements into an extrusion into 3D
-9. Solve Poisson Equation in 3D
+8. Extrude the 2D elements into an extrusion into 3D (Yao)
+9. Solve Poisson Equation in 3D (Yao)
 10. Verify 3D steady solutions
