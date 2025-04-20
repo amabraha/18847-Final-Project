@@ -198,7 +198,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   if (in.numberofholes > 0)
   {
     in.holelist = (REAL *)malloc(in.numberofholes * 2 * sizeof(REAL));
-    for(int i=0; i<segcount; i++)
+    for(int i=0; i<holecount; i++)
       {
         int holeID;
         REAL x, y;
@@ -218,6 +218,9 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   out.pointattributelist = (REAL *) NULL;
   out.trianglelist = (int *) NULL;
   out.triangleattributelist = (REAL *) NULL;
+  out.pointmarkerlist = (int *) NULL;
+  out.segmentlist = (int *) NULL;
+  out.segmentmarkerlist = (int *) NULL;
 
   /* Refine the triangulation according to the attached */
   /*   triangle area constraints.                       */
