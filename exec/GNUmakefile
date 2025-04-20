@@ -10,8 +10,12 @@ include $(HOME)/GNUmakefile
 CFLAGS += -O3
 #CFLAGS += -g
 
-# fesolver2d.exe: GNUmakefile $(OBJS) FEMain.cpp
-# 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver2d.exe FEMain.cpp  $(OBJS)
+CXX = g++
+# CXX = clang++
+# Set DIM dynamically on command line, e.g. make extrude DIM=3, default is 2D
+DIM ?= 2
+CPPFLAGS = -DDIM=$(DIM)
+
 
 fesolver.exe: GNUmakefile $(OBJS) FEMain.cpp
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)
@@ -20,6 +24,7 @@ run: fesolver.exe
 	./fesolver.exe ../FEData/A
 	./fesolver.exe ../FEData/B.2
 
+# Set DIM as 3 on command line, i.e. make extrude DIM=3
 extrude: fesolver.exe 
 	./fesolver.exe ../FEData/B.2 --extrude
 
@@ -28,4 +33,8 @@ poly: fesolver.exe
 
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM *.vtk *.o *.d
+
+%.o:%.cpp GNUmakefile
+	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CXX) -MM $(CFLAGS) $< > $*.d
 
