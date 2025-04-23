@@ -32,6 +32,11 @@ public:
   /// const access to the SparseMatrix object.
   const SparseMatrix<T> &matrix() const;
 
+  // apply non-zero Dirichlet boundary conditions
+  void applyDirichletBC(SparseMatrix<T> &L,
+                        std::vector<T> &rhs,
+                        std::function<T(const Node &)> Phi_omega) const;
+
 private:
   FEGrid m_grid;
   SparseMatrix<T> m_matrix;

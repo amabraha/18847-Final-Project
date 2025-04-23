@@ -51,6 +51,9 @@ public:
   /// Checks to see whether the matrix is symmetric.
   bool symmetric() const;
 
+  /// sets every stored entry in row r to zero (keeps the sparsity pattern)
+  void zeroRow(int r);
+
   void print() const;
 
 private:

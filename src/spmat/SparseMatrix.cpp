@@ -179,6 +179,15 @@ void SparseMatrix<T>::print() const
   printf("]\n");
 }
 
+/* === new helper body ============================================ */
+template <typename T>
+void SparseMatrix<T>::zeroRow(int r)
+{
+  assert(r >= 0 && r < static_cast<int>(m_m));
+  for (T &val : m_data[r]) // m_data stores the non-zeros
+    val = m_zero;          // overwrite each with additive identity
+}
+
 // Explicit template instantiations
 template class SparseMatrix<float>;
 template class SparseMatrix<double>;

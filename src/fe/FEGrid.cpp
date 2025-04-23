@@ -61,7 +61,7 @@ array<double, DIM> FEGrid::gradient(
 {
   const Element &e = m_elements[a_eltNumber];
   const Node &n = m_nodes[e[a_nodeNumber]];
-  assert(n.isInterior());
+  // assert(n.isInterior()); 
   struct xb
   {
     double x[DIM];
