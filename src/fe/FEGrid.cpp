@@ -73,6 +73,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
 {
   struct triangulateio in, out;
   in.numberofcorners = 3;
+  in.numberofregions = 0;
 
   ifstream poly(a_polyFileName.c_str());
 
