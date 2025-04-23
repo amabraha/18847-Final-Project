@@ -17,17 +17,21 @@ FETimeDependent::FETimeDependent(const SparseMatrix& a_L, const function<vector<
 void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out)
 {
   vector<double> rhs = vector<double>(a_phi_out.size());
+  //copy -m_L to A
   SparseMatrix A(m_L, -1);
 
   for (int i = 0; i < a_phi_out.size(); i ++)
   {
+    //for the rhs this constructs 1/dt phi(t) - f(t + dt)
     rhs[i] = a_phi_out[i]/dt - m_f(time+dt)[i];
+
+    //this constructs 1/dt I - L
     A.access(array<int, 2>{i,i}) += 1/dt;
   }
 
   JacobiSolver solver;
   //ehh just picked 1000 and 1e-6 arbitrarily
-  solver.solve(a_phi_out, A, rhs, 1E-6, 1000);
+  solver.solve(a_phi_out, A, rhs, 1E-7, 1000);
 }
 
 void FETimeDependent::solve(double time, double dt, vector<double>& a_phi_out, 
@@ -81,6 +85,7 @@ void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_
       step(t, dt, a_phi_out);
     }
 
+    //visit writing process
     vector<double> phi_full;
     reinsert(m_grid, a_phi_out, phi_full);
 

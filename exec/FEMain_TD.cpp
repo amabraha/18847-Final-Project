@@ -20,7 +20,7 @@ float sourcePhi(double time, array<double, DIM> x)
     return 1.0;
   } else
   {
-    return 4.0*sin(Rsquared*sin(time));
+    return 4.0*sin(5.0*Rsquared*sin(time));
   }
 }
 
@@ -36,16 +36,16 @@ float derivedf(double time, array<double, DIM> x)
     return 0.0;
   } else
   {
-    // dphi/dx = 4.0*cos(Rsquared*sin(time))*2.0*x[0]*sin(time)
-    // d^2phi/dx^2 = -4.0*sin(Rsquared*sin(time))*2.0*x[0]*sin(time)*2.0*x[0]*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time)
+    // dphi/dx = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)
+    // d^2phi/dx^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
     
-    // dphi/dy = 4.0*cos(Rsquared*sin(time))*2.0*(x[1]-9)*sin(time)
-    // d^2phi/dy^2 = -4.0*sin(Rsquared*sin(time))*2.0*(x[1]-9)*sin(time)*2.0*(x[1]-9)*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time)
+    // dphi/dy = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)
+    // d^2phi/dy^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
 
-    // dphi/dt = 4.0*cos(Rsquared*sin(time))*Rsquared*cos(time)
-    double d2phidx2 = -4.0*sin(Rsquared*sin(time))*2.0*x[0]*sin(time)*2.0*x[0]*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time);
-    double d2phidy2 = -4.0*sin(Rsquared*sin(time))*2.0*(x[1]-9)*sin(time)*2.0*(x[1]-9)*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time);
-    double dphidt = 4.0*cos(Rsquared*sin(time))*Rsquared*cos(time);
+    // dphi/dt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time)
+    double d2phidx2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
+    double d2phidy2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
+    double dphidt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time);
 
     return d2phidx2 + d2phidy2 - dphidt;
   }
@@ -116,8 +116,27 @@ int main(int argc, char** argv)
 
   vector<double> internalNodes;
 
-//   TDsolver.solve(10, .01, internalNodes, initial_conditions, rhs_f);
-  TDsolver.solve_write(4, .01, internalNodes, initial_conditions, rhs_f, "vtk_output/solution");
+  TDsolver.solve_write(1, .005, internalNodes, initial_conditions, rhs_f, "vtk_output/solution");
+
+
+
+  //error analysis using infinity norm
+  double maxerr = 0.0;
+
+  for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
+  {
+    Node n = grid.node(nodeidx);
+    if (n.isInterior())
+    {
+      double newerr = abs(internalNodes[n.getInteriorNodeID()] - sourcePhi(1, n.getPosition()));
+      if (newerr > maxerr)
+      {
+        maxerr = newerr;
+      }
+    }
+  }
+
+  cout << "infinity norm of calculated phi and source phi is: " << maxerr << endl;
   
   return 0;
   
