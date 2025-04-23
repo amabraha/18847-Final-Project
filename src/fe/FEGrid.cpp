@@ -8,6 +8,15 @@
 #include "FEGrid.H"
 #include "VisitWriter.H"
 #include <fstream>
+#include <iostream>
+
+/* Triangle related */
+#define REAL double
+#define VOID void
+extern "C" {
+  #define ANSI_DECLARATORS
+  #include "triangle.h"
+}
 
 FEGrid::FEGrid(): m_numInteriorNodes(0)
 {
@@ -53,6 +62,186 @@ FEGrid::FEGrid(const std::string& a_nodeFileName, const std::string& a_elementFi
       m_elements[cellID] = Element(vert);
     }
 };
+
+/**
+#1 Integrate Triangle:
+Read the .poly file for nodes, segments
+call triangle to generate nodes and elements
+initialize nodes and elements
+*/
+FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
+{
+  struct triangulateio in, out;
+  in.numberofcorners = 3;
+
+  ifstream poly(a_polyFileName.c_str());
+
+  if (!poly) 
+  {
+      std::cout << "Error: File does not exist or failed to open: " << a_polyFileName << std::endl;
+      return;
+  }
+
+  // Read the vertices: build up pointlist
+  int ncount, dim, attributes, boundaryMarkers;
+  poly>>ncount>>dim>>attributes>>boundaryMarkers;
+  
+  in.numberofpoints = ncount;
+  in.numberofpointattributes = attributes;
+  in.pointlist = (REAL *) malloc(in.numberofpoints * 2 * sizeof(REAL));
+  if (in.numberofpointattributes > 0) {
+    in.pointattributelist = (REAL *) malloc(in.numberofpoints *
+                                          in.numberofpointattributes *
+                                          sizeof(REAL));
+  } else
+  {
+    in.pointattributelist = (REAL *) NULL;
+  }
+  if (boundaryMarkers > 0) {
+    in.pointmarkerlist = (int *) malloc(in.numberofpoints * sizeof(int));
+  } else
+  {
+    in.pointmarkerlist = (int *) NULL;
+  }
+
+  for(int i=0; i<ncount; i++)
+    {
+      int vertex;
+      double x, y;
+      poly>>vertex>>x>>y;
+      vertex--;
+      in.pointlist[vertex*2] = x;
+      in.pointlist[vertex*2+1] = y;
+
+      for (int j = 0; j < in.numberofpointattributes; j++)
+      {
+        poly>>in.pointattributelist[vertex*in.numberofpointattributes + j];
+      }
+
+      if (boundaryMarkers > 0) {
+        poly>>in.pointmarkerlist[vertex];
+      }
+    }
+
+  in.trianglelist = (int *) NULL;
+  
+  // Read the segments: build up segment list
+  int segcount, segboundaryMarkers;
+  poly>>segcount>>segboundaryMarkers;
+  in.numberofsegments = segcount;
+  in.segmentlist = (int *) malloc(in.numberofsegments * 2 * sizeof(int));
+  if (segboundaryMarkers > 0) {
+    in.segmentmarkerlist = (int *) malloc(in.numberofsegments * sizeof(int));
+  } else
+  {
+    in.segmentmarkerlist = (int *) NULL;
+  }
+  for(int i=0; i<segcount; i++)
+    {
+      int segID, endpoint1, endpoint2;
+      poly>>segID>>endpoint1>>endpoint2;
+      segID--;
+      if (segboundaryMarkers > 0) {
+        poly>>in.segmentmarkerlist[segID];
+      }
+      in.segmentlist[segID*2] = endpoint1;
+      in.segmentlist[segID*2+1] = endpoint2;
+    }
+  
+  int holecount;
+  poly>>holecount;
+  in.numberofholes = holecount;
+  if (in.numberofholes > 0)
+  {
+    in.holelist = (REAL *)malloc(in.numberofholes * 2 * sizeof(REAL));
+    for(int i=0; i<holecount; i++)
+      {
+        int holeID;
+        REAL x, y;
+        poly>>holeID>>x>>y;
+        holeID--;
+        in.holelist[holeID*2] = x;
+        in.holelist[holeID*2+1] = y;
+      }
+  }
+
+  // assumes fixed max area, no regional attributes and/or area constraints in .poly
+
+  /* Make necessary initializations so that Triangle can return a */
+  /*   triangulation in `out'.                                    */
+
+  out.pointlist = (REAL *) NULL; 
+  out.pointattributelist = (REAL *) NULL;
+  out.trianglelist = (int *) NULL;
+  out.triangleattributelist = (REAL *) NULL;
+  out.pointmarkerlist = (int *) NULL;
+  out.segmentlist = (int *) NULL;
+  out.segmentmarkerlist = (int *) NULL;
+
+  /* Refine the triangulation according to the attached */
+  /*   triangle area constraints.                       */
+  char switches[20];
+  snprintf(switches, sizeof(switches), "pqa%f", max_area);
+  triangulate(switches, &in, &out, (struct triangulateio *) NULL);
+
+  // Read nodes from pointlist
+  ncount = out.numberofpoints;
+  boundaryMarkers = (out.pointmarkerlist != NULL);
+  m_nodes.resize(ncount);
+  m_numInteriorNodes= 0;
+  for(int vertex=0; vertex<ncount; vertex++)
+    {
+      int type = out.pointmarkerlist[vertex];
+      array<double, DIM> x;
+      x[0] = out.pointlist[vertex*2];
+      x[1] = out.pointlist[vertex*2+1];
+      if(type == 1)
+	{
+	  m_nodes[vertex] = Node(x,-1, false);
+	}
+      else
+	{
+	  m_nodes[vertex] = Node(x, m_numInteriorNodes, true);
+	  m_numInteriorNodes++;
+	}
+    }
+
+  // Read elements from trianglelist
+  int ncell;
+  ncell = out.numberoftriangles;
+  m_elements.resize(ncell);
+  for(int i=0; i<ncell; i++)
+    {
+      int cellID = i;
+      array<int, VERTICES> vert;
+      vert[0] = out.trianglelist[cellID*3] - 1; // 1-based indexing
+      vert[1] = out.trianglelist[cellID*3+1] - 1;
+      vert[2] = out.trianglelist[cellID*3+2] - 1;
+      m_elements[cellID] = Element(vert);
+    }
+
+  // free all allocated arrays
+  free(in.pointlist);
+  free(in.pointattributelist);
+  if (boundaryMarkers > 0) {
+    free(in.pointmarkerlist);
+  }
+  if (in.numberofsegments > 0) {
+    free(in.segmentlist);
+    if (segboundaryMarkers > 0) {
+      free(in.segmentmarkerlist);
+    }
+  }
+  if (in.numberofholes > 0) {
+    free(in.holelist);
+  }
+  
+  free(out.pointlist);
+  free(out.pointattributelist);
+  free(out.trianglelist);
+  free(out.triangleattributelist);
+};
+
 array<double, DIM> FEGrid::gradient(
                                    const int& a_eltNumber,
                                    const int& a_nodeNumber) const

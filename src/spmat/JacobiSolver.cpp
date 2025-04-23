@@ -45,10 +45,10 @@ double Jacobi_helper(
   //if we have converged or reached max number of iteratoins
   if (a_curr_iter == a_iter || norm(residual) <= a_tolerance * norm(a_rhs))
     {
-      printf("initial norm(rhs): %f\nfinal norm(residual)/norm(rhs): %e\nnumber iterations: %d\n", 
-              norm(a_rhs), 
-              norm(residual)/norm(a_rhs), 
-              a_curr_iter);
+      // printf("initial norm(rhs): %f\nfinal norm(residual)/norm(rhs): %e\nnumber iterations: %d\n", 
+      //         norm(a_rhs), 
+      //         norm(residual)/norm(a_rhs), 
+      //         a_curr_iter);
       return norm(residual)/norm(a_rhs);
     }
 

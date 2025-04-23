@@ -7,6 +7,51 @@
 #include <array>
 using namespace std;
 
+//
+float sourcePhi(double time, array<double, DIM> x)
+{
+  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
+  
+  if (Rsquared <= 25) //inner boundary
+  {
+    return -1.0;
+  } else if (Rsquared >= 36) //outer boundary
+  {
+    return 1.0;
+  } else
+  {
+    return 4.0*sin(Rsquared*sin(time));
+  }
+}
+
+float derivedf(double time, array<double, DIM> x)
+{
+  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
+  
+  if (Rsquared <= 25) //inner boundary
+  {
+    return 0.0;
+  } else if (Rsquared >= 36) //outer boundary
+  {
+    return 0.0;
+  } else
+  {
+    // dphi/dx = 4.0*cos(Rsquared*sin(time))*2.0*x[0]*sin(time)
+    // d^2phi/dx^2 = -4.0*sin(Rsquared*sin(time))*2.0*x[0]*sin(time)*2.0*x[0]*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time)
+    
+    // dphi/dy = 4.0*cos(Rsquared*sin(time))*2.0*(x[1]-9)*sin(time)
+    // d^2phi/dy^2 = -4.0*sin(Rsquared*sin(time))*2.0*(x[1]-9)*sin(time)*2.0*(x[1]-9)*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time)
+
+    // dphi/dt = 4.0*cos(Rsquared*sin(time))*Rsquared*cos(time)
+    double d2phidx2 = -4.0*sin(Rsquared*sin(time))*2.0*x[0]*sin(time)*2.0*x[0]*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time);
+    double d2phidy2 = -4.0*sin(Rsquared*sin(time))*2.0*(x[1]-9)*sin(time)*2.0*(x[1]-9)*sin(time)+4.0*cos(Rsquared*sin(time))*2.0*sin(time);
+    double dphidt = 4.0*cos(Rsquared*sin(time))*Rsquared*cos(time);
+
+    return d2phidx2 + d2phidy2 - dphidt;
+  }
+
+}
+
 float sourceFunction(double time, array<double, DIM> x)
 {
   double val=-.2;
@@ -49,7 +94,7 @@ int main(int argc, char** argv)
     for(int i=0; i<nElements; i++)
     {
     centroid = grid.centroid(i);
-    sourceTerms[i] = sourceFunction(time, centroid);
+    sourceTerms[i] = derivedf(time, centroid);
     }
   
     vector<double> rhs;
