@@ -66,17 +66,27 @@ float sourceFunction(double time, array<double, DIM> x)
 
 int main(int argc, char** argv)
 {
-  if(argc != 2)
-    {
-      cout << "this program takes one argument that is the .node and .ele ";
+  if(argc > 3)
+      {
+      cout << "this program takes one argument that is the .node and .ele OR .poly and max area";
       cout << "file prefix"<<endl;
       return 1;
     }
+  FEGrid grid;
   string prefix(argv[1]);
-  string nodeFile = prefix+".node";
-  string eleFile  = prefix+".ele";
+  if (argc == 2)
+  {
+    string nodeFile = prefix+".node";
+    string eleFile  = prefix+".ele";
 
-  FEGrid grid(nodeFile, eleFile);
+    grid = FEGrid(nodeFile, eleFile);
+  } else
+  {
+    string polyFile = prefix+".poly";
+    double max_area = stod(argv[2]);
+    
+    grid = FEGrid(polyFile, max_area);
+  }
 
   FEPoissonOperator op(grid);
   
@@ -107,7 +117,7 @@ int main(int argc, char** argv)
   vector<double> internalNodes;
 
 //   TDsolver.solve(10, .01, internalNodes, initial_conditions, rhs_f);
-  TDsolver.solve_write(10, .01, internalNodes, initial_conditions, rhs_f, "vtk_output/solution");
+  TDsolver.solve_write(4, .01, internalNodes, initial_conditions, rhs_f, "vtk_output/solution");
   
   return 0;
   
