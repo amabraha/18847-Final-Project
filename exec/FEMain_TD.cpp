@@ -7,7 +7,7 @@
 #include <array>
 using namespace std;
 
-//
+
 float sourcePhi(double time, array<double, DIM> x)
 {
   double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
