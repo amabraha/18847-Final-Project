@@ -11,58 +11,30 @@ using namespace std;
 float sourcePhi(double time, array<double, DIM> x)
 {
   double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-  
-  if (Rsquared <= 25) //inner boundary
-  {
-    return -1.0;
-  } else if (Rsquared >= 36) //outer boundary
-  {
-    return 1.0;
-  } else
-  {
-    return 4.0*sin(5.0*Rsquared*sin(time));
-  }
+  return 4.0*sin(5.0*Rsquared*sin(time));
+
 }
 
 float derivedf(double time, array<double, DIM> x)
 {
   double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
+
+  //calculations for partials:
+  // dphi/dx = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)
+  // d^2phi/dx^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
   
-  if (Rsquared <= 25) //inner boundary
-  {
-    return 0.0;
-  } else if (Rsquared >= 36) //outer boundary
-  {
-    return 0.0;
-  } else
-  {
-    // dphi/dx = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)
-    // d^2phi/dx^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
-    
-    // dphi/dy = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)
-    // d^2phi/dy^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
+  // dphi/dy = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)
+  // d^2phi/dy^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
 
-    // dphi/dt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time)
-    double d2phidx2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
-    double d2phidy2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
-    double dphidt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time);
+  // dphi/dt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time)
+  double d2phidx2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
+  double d2phidy2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
+  double dphidt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time);
 
-    return d2phidx2 + d2phidy2 - dphidt;
-  }
+  return d2phidx2 + d2phidy2 - dphidt;
 
 }
 
-float sourceFunction(double time, array<double, DIM> x)
-{
-  double val=-.2;
-  // region 1
-  float Rsquared=(x[1]-9)*(x[1]-9)+x[0]*x[0];
-  if(Rsquared > 25 && Rsquared < 36)
-    {
-      val = 1.5;
-    }
-  return val;
-}
 
 int main(int argc, char** argv)
 {
@@ -88,10 +60,10 @@ int main(int argc, char** argv)
     grid = FEGrid(polyFile, max_area);
   }
 
-  FEPoissonOperator op(grid);
+  FEPoissonOperator<double> op(grid);
   
 
-  vector<double> initial_conditions(grid.getNumInteriorNodes());
+  vector<double> initial_conditions(grid.getNumNodes());
 
   function<vector<double>(double)> rhs_f = [&grid, &op](double time)
   {
@@ -112,11 +84,26 @@ int main(int argc, char** argv)
     return rhs;
   };
 
+  function<double(const Node &, double)> boundary_cond = [](const Node &n, double time)
+  {
+    double x = n.getPosition()[0];
+    double y = n.getPosition()[1];
+    double Rsquared = (y-9)*(y-9)+x*x;
+    if (Rsquared <= 26)
+    {
+      return -1.0;
+    } else if (Rsquared >= 35)
+    {
+      return -1.0;
+    }
+    return 0.0;
+  };
+
   FETimeDependent TDsolver(op.matrix(), rhs_f, grid);
 
-  vector<double> internalNodes;
+  vector<double> phi_nodes;
 
-  TDsolver.solve_write(1, .005, internalNodes, initial_conditions, rhs_f, "vtk_output/solution");
+  TDsolver.solve_write(1, .005, phi_nodes, initial_conditions, boundary_cond, "vtk_output/solution");
 
 
 
@@ -128,7 +115,7 @@ int main(int argc, char** argv)
     Node n = grid.node(nodeidx);
     if (n.isInterior())
     {
-      double newerr = abs(internalNodes[n.getInteriorNodeID()] - sourcePhi(1, n.getPosition()));
+      double newerr = abs(phi_nodes[n.getInteriorNodeID()] - sourcePhi(1, n.getPosition()));
       if (newerr > maxerr)
       {
         maxerr = newerr;

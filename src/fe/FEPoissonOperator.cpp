@@ -1,4 +1,4 @@
-#include <cmath>  
+#include <cmath>
 #include <cassert>
 #include <cmath>
 #include <vector>
@@ -9,102 +9,117 @@ using namespace std;
 #include "FEGrid.H"
 #include "SparseMatrix.H"
 #include "FEPoissonOperator.H"
-
+#include <complex>
 
 double dotprod(array<double, DIM> x, array<double, DIM> y)
 {
-  return x[0]*y[0] + x[1]*y[1];
+    return x[0] * y[0] + x[1] * y[1];
 }
 
-FEPoissonOperator::FEPoissonOperator(const FEGrid& a_grid)
+template <typename T>
+FEPoissonOperator<T>::FEPoissonOperator(const FEGrid &a_grid)
 {
-  m_grid = a_grid;
-  m_matrix = SparseMatrix(m_grid.getNumInteriorNodes(), m_grid.getNumInteriorNodes());
+    m_grid = a_grid;
+    // include all nodes in the matrix (both interior and boundary)
+    m_matrix = SparseMatrix<T>(m_grid.getNumNodes(),  // rows
+                               m_grid.getNumNodes()); // cols
 
-  //loop through each element
-  for(int iEl = 0; iEl < m_grid.getNumElts(); iEl ++)
+    // loop through each element
+    for (int iEl = 0; iEl < m_grid.getNumElts(); iEl++)
     {
-      //access element with id iEl
-      const Element& e = m_grid.element(iEl);
+        // access element with id iEl
+        const Element &e = m_grid.element(iEl);
 
-      //loop through the local vertices of element e
-      for(int iVert = 0; iVert < VERTICES; iVert ++)
+        // loop through the local vertices of element e
+        for (int iVert = 0; iVert < VERTICES; ++iVert)
         {
-          //xn and xm are a pair of adjacent vertices in element e
-          const Node& xn = m_grid.node(e[iVert]);
-          const Node& xm = m_grid.node(e[(iVert+1) % VERTICES]);
+            // 1) grab global node indices from the element connectivity
+            int ig = e[iVert];                  // global row
+            int jg = e[(iVert + 1) % VERTICES]; // global col
 
-          //we will separately populate matrix entries of the form L_{n,n} and entries of the form L_{m,n} (where m,n are distinct)
-
-          //we only populate L_{n,n} if xn is interior
-          if (xn.isInterior())
+            // 2) diagonal entry L_{ig,ig} += area * grad_i · grad_i
             {
-              array<int, 2> sparse_matrix_indx = array<int, 2>{xn.getInteriorNodeID(), xn.getInteriorNodeID()};
-
-              //using the pseudocode in page 21 of lecture 8, we know the gradients are constant,
-              // so integrating over Ke is the same as multiplying with the area of Ke
-              m_matrix[sparse_matrix_indx] += m_grid.elementArea(iEl)*dotprod(m_grid.gradient(iEl, iVert), m_grid.gradient(iEl, iVert));
+                array<int, 2> idx = {ig, ig};
+                m_matrix[idx] += m_grid.elementArea(iEl) * dotprod(m_grid.gradient(iEl, iVert),
+                                                                   m_grid.gradient(iEl, iVert));
             }
 
-          //we only populate L_{n,m} if xn and xm are interior
-          if (xn.isInterior() && xm.isInterior())
+            // 3) off-diagonal entry L_{ig,jg} and symmetric partner L_{jg,ig}
             {
-              //we will simultaneously update L_{n,m} and L_{m,n} since L is symmetric
-              array<int, 2> sparse_matrix_indx = array<int, 2>{xn.getInteriorNodeID(), xm.getInteriorNodeID()};
-              array<int, 2> sparse_matrix_indx_trans = array<int, 2>{sparse_matrix_indx[1], sparse_matrix_indx[0]};
-
-              //using the pseudocode in page 21 of lecture 8, we know the gradients are constant,
-              // so integrating over Ke is the same as multiplying with the area of Ke
-              m_matrix[sparse_matrix_indx] += m_grid.elementArea(iEl)*dotprod(m_grid.gradient(iEl, iVert), m_grid.gradient(iEl, (iVert+1) % VERTICES));
-              m_matrix[sparse_matrix_indx_trans] = m_matrix[sparse_matrix_indx];
+                array<int, 2> idx = {ig, jg};
+                array<int, 2> idxT = {jg, ig};
+                m_matrix[idx] += m_grid.elementArea(iEl) * dotprod(m_grid.gradient(iEl, iVert),
+                                                                   m_grid.gradient(iEl, (iVert + 1) % VERTICES));
+                m_matrix[idxT] = m_matrix[idx];
             }
         }
     }
 }
 
-void FEPoissonOperator::makeRHS(
-  vector<double> & a_rhsAtNodes, 
-  const vector<double> & a_FCentroids) const
+template <typename T>
+void FEPoissonOperator<T>::makeRHS(
+    vector<T> &a_rhsAtNodes,
+    const vector<T> &a_FCentroids) const
 {
-  a_rhsAtNodes.resize(m_grid.getNumInteriorNodes());
-  
-  //zero out all entries in RHS
-  for (int i = 0; i < a_rhsAtNodes.size(); i ++)
-    {
-      a_rhsAtNodes[i] = 0.0;
-    }
+    // 1) global resize
+    a_rhsAtNodes.resize(m_grid.getNumNodes());
 
-  //loop through each element
-  for(int iEl = 0; iEl < m_grid.getNumElts(); iEl ++)
-    {
-      //access element with id iEL
-      const Element& e = m_grid.element(iEl);
+    // 2) zero out
+    for (int i = 0; i < (int)a_rhsAtNodes.size(); ++i)
+        a_rhsAtNodes[i] = T(0.0);
 
-      //loop through the local vertices of element e
-      for(int iVert = 0; iVert < VERTICES; iVert ++)
+    // 3) loop elements
+    for (int iEl = 0; iEl < m_grid.getNumElts(); ++iEl)
+    {
+        T area = static_cast<T>(m_grid.elementArea(iEl));
+        T factor = T(1.0) / T(3.0);
+
+        const Element &e = m_grid.element(iEl);
+        for (int iVert = 0; iVert < VERTICES; ++iVert)
         {
-          //xn is the corresponding vertex in element e
-          const Node& xn = m_grid.node(e[iVert]);
-
-          //we only populate b_n if xn is interior
-          if (xn.isInterior())
-            {
-              //Using the pseudocode from page 22 of lecture 8. We know that Psi_n^h(centroid)=1/3 since it is piecewise linear
-              a_rhsAtNodes[xn.getInteriorNodeID()] += m_grid.elementArea(iEl)*a_FCentroids[iEl]*(1.0/3.0);
-            }
+            int ig = e[iVert]; // global node index
+            a_rhsAtNodes[ig] += area * a_FCentroids[iEl] * factor;
         }
     }
-
 }
 
-
-const FEGrid& FEPoissonOperator::getFEGrid() const
+template <typename T>
+void FEPoissonOperator<T>::applyDirichletBC(
+    SparseMatrix<T> &L,
+    std::vector<T> &rhs,
+    std::function<T(const Node &)> Phi_omega) const
 {
-  return m_grid;
+    // loop by *global* node index
+    for (int i = 0; i < m_grid.getNumNodes(); ++i)
+    {
+        const Node &n = m_grid.node(i);
+        if (n.isInterior())
+            continue;
+
+        T g = Phi_omega(n);
+
+        L.zeroRow(i); // wipe old Laplace row
+        array<int, 2> d = {i, i};
+        L[d] = T(1); // 1·φ_i = g
+        rhs[i] = g;  // enforce value
+    }
 }
 
-
-const SparseMatrix& FEPoissonOperator::matrix() const
+template <typename T>
+const FEGrid &FEPoissonOperator<T>::getFEGrid() const
 {
-  return m_matrix;
+    return m_grid;
 }
+
+template <typename T>
+const SparseMatrix<T> &FEPoissonOperator<T>::matrix() const
+{
+    return m_matrix;
+}
+
+// Explicit template instantiations
+template class FEPoissonOperator<float>;
+template class FEPoissonOperator<double>;
+template class FEPoissonOperator<std::complex<float>>;
+template class FEPoissonOperator<std::complex<double>>;
+

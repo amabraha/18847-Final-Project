@@ -7,18 +7,33 @@ using namespace std;
 
 
 
-FETimeDependent::FETimeDependent(const SparseMatrix& a_L, const function<vector<double>(double)>& a_f, const FEGrid& a_grid)
+FETimeDependent::FETimeDependent(const SparseMatrix<double>& a_L, const function<vector<double>(double)>& a_f, const FEGrid& a_grid)
 {
   m_L = a_L;
   m_f = a_f;
   m_grid = a_grid;
 }
 
-void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out)
+void FETimeDependent::apply_boundary(vector<double>& a_phi, double time, const function<double(const Node &, double)>& a_boundary_cond)
 {
+  for (int i = 0; i < m_grid.getNumNodes(); ++i)
+  {
+      const Node &n = m_grid.node(i);
+      if (n.isInterior())
+          continue;
+
+      double g = a_boundary_cond(n, time);
+      a_phi[i] = g;  // enforce value
+  }
+}
+
+void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond)
+{
+  apply_boundary(a_phi_out, time, a_boundary_cond);
+
   vector<double> rhs = vector<double>(a_phi_out.size());
   //copy -m_L to A
-  SparseMatrix A(m_L, -1);
+  SparseMatrix<double> A(m_L, -1);
 
   for (int i = 0; i < a_phi_out.size(); i ++)
   {
@@ -29,13 +44,15 @@ void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out)
     A.access(array<int, 2>{i,i}) += 1/dt;
   }
 
-  JacobiSolver solver;
+  JacobiSolver<double> solver;
   //ehh just picked 1000 and 1e-6 arbitrarily
   solver.solve(a_phi_out, A, rhs, 1E-7, 1000);
+
+  apply_boundary(a_phi_out, time+dt, a_boundary_cond);
 }
 
 void FETimeDependent::solve(double time, double dt, vector<double>& a_phi_out, 
-                            const vector<double>& a_initial_cond, const function<vector<double>(double)>& a_boundary_cond)
+                            const vector<double>& a_initial_cond, const function<double(const Node &, double)>& a_boundary_cond)
 {
   //initialize our output to the initial condition
   a_phi_out.resize(a_initial_cond.size());
@@ -50,16 +67,16 @@ void FETimeDependent::solve(double time, double dt, vector<double>& a_phi_out,
   {
     if (t + dt > time)
     {
-      step(t, time-t, a_phi_out);
+      step(t, time-t, a_phi_out, a_boundary_cond);
       break;
     }
     t += dt;
-    step(t, dt, a_phi_out);
+    step(t, dt, a_phi_out, a_boundary_cond);
   }
 }
 
 void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_out, 
-                                  const vector<double>& a_initial_cond, const function<vector<double>(double)>& a_boundary_cond,
+                                  const vector<double>& a_initial_cond, const function<double(const Node &, double)>& a_boundary_cond,
                                   string a_filename)
 {
   //initialize our output to the initial condition
@@ -76,21 +93,19 @@ void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_
   {
     if (t + dt > time)
     {
-      step(t, time-t, a_phi_out);
+      step(t, time-t, a_phi_out, a_boundary_cond);
       t = time;
     } 
     else 
     {
       t += dt;
-      step(t, dt, a_phi_out);
+      step(t, dt, a_phi_out, a_boundary_cond);
     }
 
     //visit writing process
-    vector<double> phi_full;
-    reinsert(m_grid, a_phi_out, phi_full);
 
     string filename = a_filename+to_string(file_counter)+".vtk";
-    FEWrite(&m_grid, &phi_full, filename.c_str());
+    FEWrite(&m_grid, &a_phi_out, filename.c_str());
     file_counter += 1;
 
   }
