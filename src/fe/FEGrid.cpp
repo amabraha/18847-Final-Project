@@ -401,7 +401,8 @@ double FEGrid::elementArea(const int& a_eltNumber) const
         {
           dx[ivert-1][idir] -=xbase[idir];
         }
-    }        
+    }  
+  }      
   if (DIM == 2) 
   {
     // WARNING: the following calculation is correct for triangles in 2D *only*.
@@ -439,6 +440,7 @@ const Node &FEGrid::getNode(const int &a_eltNumber, const int &a_localNodeNumber
 {
   return m_nodes[m_elements[a_eltNumber][a_localNodeNumber]];
 }
+
 int FEGrid::getNumElts() const
 {
   return m_elements.size();

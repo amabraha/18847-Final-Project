@@ -3,9 +3,6 @@
 
 HOME = ./..
 
-# Data type selection (float, double, complex_float, complex_double)
-DATATYPE ?= double
-
 # We've made a common set of makefile definitions and rules in the home directory.
 # By including that file, you have all the definitions you need.
 
@@ -13,6 +10,15 @@ include $(HOME)/GNUmakefile
 CFLAGS += -O3
 #CFLAGS += -g
 
+CXX = g++
+# CXX = clang++
+
+# Set DIM dynamically on command line, e.g. make extrude DIM=3, default is 2D
+DIM ?= 2
+CPPFLAGS = -DDIM=$(DIM)
+
+# Data type selection (float, double, complex_float, complex_double)
+DATATYPE ?= double
 
 # Add data type specific flags
 ifeq ($(DATATYPE),float)
@@ -26,13 +32,6 @@ else ifeq ($(DATATYPE),complex_double)
 else
     $(error Invalid DATATYPE. Use one of: float, double, complex_float, complex_double)
 endif
-
-CXX = g++
-# CXX = clang++
-# Set DIM dynamically on command line, e.g. make extrude DIM=3, default is 2D
-DIM ?= 2
-CPPFLAGS = -DDIM=$(DIM)
-
 
 fesolver.exe: GNUmakefile $(OBJS) FEMain.cpp
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)

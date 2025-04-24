@@ -10,6 +10,7 @@
 #include "FEGrid.H"
 #include "SparseMatrix.H"
 #include <array>
+#include <functional>
 using namespace std;
 /// Interface to the matrix representation of a finite element operator.
 /**
