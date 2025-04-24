@@ -93,7 +93,7 @@ void FEPoissonOperator<T>::applyDirichletBC(
     for (int i = 0; i < m_grid.getNumNodes(); ++i)
     {
         const Node &n = m_grid.node(i);
-        if (!n.isInterior())
+        if (n.isInterior())
             continue;
 
         T g = Phi_omega(n);
