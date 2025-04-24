@@ -19,17 +19,41 @@ float sourceFunction(array<double, DIM> x)
 
 int main(int argc, char **argv)
 {
-  if (argc != 2)
-  {
-    cout << "this program takes one argument that is the .node and .ele file prefix\n";
-    return 1;
-  }
+  // Parse command line arguments
+  if(argc < 2 || argc > 4)
+    {
+      cout << "Usage:" << endl;
+      cout << "  " << argv[0] << " <prefix> [max_area] [--extrude]" << endl;
+      return 1;
+    }
+
   string prefix(argv[1]);
-  string nodeFile = prefix + ".node";
-  string eleFile = prefix + ".ele";
+  bool extrude = false;
+  double max_area = -1.0;
+
+  if (argc >= 3) {
+    string arg2 = argv[2];
+    if (arg2 == "--extrude") {
+      extrude = true;
+    } else {
+      max_area = stod(arg2);
+    }
+  }
 
   // --- load mesh ---
-  FEGrid grid(nodeFile, eleFile);
+  FEGrid grid;
+  if (argc == 2 || (argc == 3 && extrude))
+  {
+    string nodeFile = prefix+".node";
+    string eleFile  = prefix+".ele";
+
+    grid = FEGrid(nodeFile, eleFile);
+  } else
+  {
+    string polyFile = prefix+".poly";
+    
+    grid = FEGrid(polyFile, max_area);
+  }
 
   // --- build operator ---
   FEPoissonOperator<double> op(grid);

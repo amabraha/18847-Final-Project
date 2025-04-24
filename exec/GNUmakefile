@@ -13,6 +13,7 @@ include $(HOME)/GNUmakefile
 CFLAGS += -O3
 #CFLAGS += -g
 
+
 # Add data type specific flags
 ifeq ($(DATATYPE),float)
     CFLAGS += -DDATATYPE=float
@@ -26,12 +27,26 @@ else
     $(error Invalid DATATYPE. Use one of: float, double, complex_float, complex_double)
 endif
 
+CXX = g++
+# CXX = clang++
+# Set DIM dynamically on command line, e.g. make extrude DIM=3, default is 2D
+DIM ?= 2
+CPPFLAGS = -DDIM=$(DIM)
+
+
 fesolver.exe: GNUmakefile $(OBJS) FEMain.cpp
-	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)
+	$(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver.exe FEMain.cpp  $(OBJS)
 
 run: fesolver.exe 
 	./fesolver.exe ../FEData/A
 	./fesolver.exe ../FEData/B.2
+
+# Set DIM as 3 on command line, i.e. make extrude DIM=3
+extrude: fesolver.exe 
+	./fesolver.exe ../FEData/B.2 --extrude
+
+poly: fesolver.exe 
+	./fesolver.exe ../FEData/test 2
 
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM *.vtk *.o *.d
@@ -48,3 +63,7 @@ run_complex_float:
 
 run_complex_double:
 	$(MAKE) DATATYPE=complex_double run
+
+%.o:%.cpp GNUmakefile
+	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
+	$(CXX) -MM $(CFLAGS) $< > $*.d
