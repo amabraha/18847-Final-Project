@@ -3,12 +3,29 @@
 
 HOME = ./..
 
+# Data type selection (float, double, complex_float, complex_double)
+DATATYPE ?= double
+
 # We've made a common set of makefile definitions and rules in the home directory.
 # By including that file, you have all the definitions you need.
 
 include $(HOME)/GNUmakefile
 CFLAGS += -O3
 #CFLAGS += -g
+
+
+# Add data type specific flags
+ifeq ($(DATATYPE),float)
+    CFLAGS += -DDATATYPE=float
+else ifeq ($(DATATYPE),double)
+    CFLAGS += -DDATATYPE=double
+else ifeq ($(DATATYPE),complex_float)
+    CFLAGS += -DDATATYPE=complex_float
+else ifeq ($(DATATYPE),complex_double)
+    CFLAGS += -DDATATYPE=complex_double
+else
+    $(error Invalid DATATYPE. Use one of: float, double, complex_float, complex_double)
+endif
 
 CXX = g++
 # CXX = clang++
@@ -34,7 +51,19 @@ poly: fesolver.exe
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM *.vtk *.o *.d
 
+# Add targets for different data types
+run_float:
+	$(MAKE) DATATYPE=float run
+
+run_double:
+	$(MAKE) DATATYPE=double run
+
+run_complex_float:
+	$(MAKE) DATATYPE=complex_float run
+
+run_complex_double:
+	$(MAKE) DATATYPE=complex_double run
+
 %.o:%.cpp GNUmakefile
 	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $< -o $@
 	$(CXX) -MM $(CFLAGS) $< > $*.d
-

@@ -1,9 +1,9 @@
-#include <cstdio>   
-#include <cmath>    
-#include <cstring>  
-#include <cassert>  
+#include <cstdio>
+#include <cmath>
+#include <cstring>
+#include <cassert>
 #include <vector>
-#include "Node.H"   
+#include "Node.H"
 #include "Element.H"
 #include "FEGrid.H"
 #include "VisitWriter.H"
@@ -18,77 +18,78 @@ extern "C" {
   #include "triangle.h"
 }
 
-FEGrid::FEGrid(): m_numInteriorNodes(0)
+FEGrid::FEGrid() : m_numInteriorNodes(0)
 {
 }
 
-FEGrid::FEGrid(const std::string& a_nodeFileName, const std::string& a_elementFileName)
+FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFileName)
 {
   ifstream nodes(a_nodeFileName.c_str());
   int ncount, dim, attributes, boundaryMarkers;
-  nodes>>ncount>>dim>>attributes>>boundaryMarkers;
-  //cout<<ncount<<" "<<dim<<" "<<endl;
+  nodes >> ncount >> dim >> attributes >> boundaryMarkers;
+  // cout<<ncount<<" "<<dim<<" "<<endl;
 
   // read nodes
   m_nodes.resize(ncount);
-  m_numInteriorNodes= 0;
-  for(int i=0; i<ncount; i++)
+  m_numInteriorNodes = 0;
+  for (int i = 0; i < ncount; i++)
+  {
+    int vertex, type;
+    array<double, DIM> x;
+    nodes >> vertex >> x[0] >> x[1] >> type;
+    vertex--;
+    if (type == 1)
     {
-      int vertex, type;
-      array<double, DIM> x = {0.0};
-      nodes>>vertex>>x[0]>>x[1]>>type;
-      vertex--;
-      if(type == 1)
-	{
-	  m_nodes[vertex] = Node(x,-1, false);
-	}
-      else
-	{
-	  m_nodes[vertex] = Node(x, m_numInteriorNodes, true);
-	  m_numInteriorNodes++;
-	}
+      m_nodes[vertex] = Node(x, -1, false);
     }
-  
+    else
+    {
+      m_nodes[vertex] = Node(x, m_numInteriorNodes, true);
+      m_numInteriorNodes++;
+    }
+  }
   // read elements
   ifstream elements(a_elementFileName.c_str());
   int ncell, nt;
-  elements>>ncell>>nt>>attributes;
+  elements >> ncell >> nt >> attributes;
   array<int, VERTICES> vert;
   m_elements.resize(ncell);
-  for(int i=0; i<ncell; i++)
+  for (int i = 0; i < ncell; i++)
+  {
+    int cellID;
+    elements >> cellID >> vert[0] >> vert[1] >> vert[2];
+    vert[0]--;
+    vert[1]--;
+    vert[2]--;
+
+    // 2d extrude into 3d, add apex point
+    if (DIM == 3) 
     {
-      int cellID;
-      elements>>cellID>>vert[0]>>vert[1]>>vert[2];
-      // 1-based indexing
-      vert[0]--; vert[1]--; vert[2]--;
-      // 2d extrude into 3d, add apex point
-      if (DIM == 3) 
-      {
-        int vertex = m_nodes.size();
-        m_nodes.resize(vertex + 1);
-        array<double, DIM> x;
-        array<double, DIM> x_a = m_nodes[vert[0]].getPosition();
-        array<double, DIM> x_b = m_nodes[vert[1]].getPosition();
-        array<double, DIM> x_c = m_nodes[vert[2]].getPosition();
+      int vertex = m_nodes.size();
+      m_nodes.resize(vertex + 1);
+      array<double, DIM> x;
+      array<double, DIM> x_a = m_nodes[vert[0]].getPosition();
+      array<double, DIM> x_b = m_nodes[vert[1]].getPosition();
+      array<double, DIM> x_c = m_nodes[vert[2]].getPosition();
 
-        // Compute centroid
-        x[0] = (x_a[0] + x_b[0] + x_c[0]) / 3.0;
-        x[1] = (x_a[1] + x_b[1] + x_c[1]) / 3.0;
+      // Compute centroid
+      x[0] = (x_a[0] + x_b[0] + x_c[0]) / 3.0;
+      x[1] = (x_a[1] + x_b[1] + x_c[1]) / 3.0;
 
-        // Compute area (cross product)
-        double area = 0.5 * fabs((x_b[0]-x_a[0])*(x_c[1]-x_a[1])-(x_c[0]-x_a[0])*(x_b[1] - x_a[1]));
+      // Compute area (cross product)
+      double area = 0.5 * fabs((x_b[0]-x_a[0])*(x_c[1]-x_a[1])-(x_c[0]-x_a[0])*(x_b[1] - x_a[1]));
 
-        // Compute height to preserve h: the 3D tetrahedron volumes have a cube root equivalent to the square root of the original 2D elements
-        x[2] = 3.0 * sqrt(area);
+      // Compute height to preserve h: the 3D tetrahedron volumes have a cube root equivalent to the square root of the original 2D elements
+      x[2] = 3.0 * sqrt(area);
 
-        // Add apex node as boundary node
-        m_nodes[vertex] = Node(x, -1, false);
-        vert[3] = vertex;
-      }
-
-      cellID--;
-      m_elements[cellID] = Element(vert);
+      // Add apex node as boundary node
+      m_nodes[vertex] = Node(x, -1, false);
+      vert[3] = vertex;
     }
+
+    cellID--;
+    m_elements[cellID] = Element(vert);
+  }
 };
 
 /**
@@ -308,18 +309,19 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
 };
 
 array<double, DIM> FEGrid::gradient(
-                                   const int& a_eltNumber,
-                                   const int& a_nodeNumber) const
+    const int &a_eltNumber,
+    const int &a_nodeNumber) const
 {
-  const Element& e = m_elements[a_eltNumber];
-  const Node& n=m_nodes[e[a_nodeNumber]];
-  assert(n.isInterior());
-  struct xb {
+  const Element &e = m_elements[a_eltNumber];
+  const Node &n = m_nodes[e[a_nodeNumber]];
+  // assert(n.isInterior()); 
+  struct xb
+  {
     double x[DIM];
   };
   array<double, DIM> xbase = n.getPosition();
-  array< array<double, DIM> , VERTICES-1> dx;
-  for (int ivert = 0;ivert < VERTICES-1; ivert++)
+  array< array<double, DIM> , VERTICES - 1> dx;
+  for (int ivert = 0;ivert < VERTICES - 1; ivert++)
     {
       // Build vectors to other nodes of the element
       int otherNodeNumber = e[(a_nodeNumber + ivert + 1)%VERTICES];
@@ -357,37 +359,41 @@ array<double, DIM> FEGrid::gradient(
 
 array<double, DIM> FEGrid::centroid(const int& a_eltNumber) const
 {
-  const Element& e =m_elements[a_eltNumber];
+  const Element &e = m_elements[a_eltNumber];
   array<double, DIM> retval;
-  for(int i=0; i<DIM; i++)
-    {
-      retval[i] = 0.0;
-    }
+  for (int i = 0; i < DIM; i++)
+  {
+    retval[i] = 0.0;
+  }
 
-  for (int ivert=0; ivert < VERTICES; ivert++)
+  for (int ivert = 0; ivert < VERTICES; ivert++)
+  {
+    const Node &n = m_nodes[e[ivert]];
+    array<double, DIM> x = n.getPosition();
+    for (int idir = 0; idir < DIM; idir++)
     {
-      const Node& n = m_nodes[e[ivert]];
-      array<double, DIM> x = n.getPosition();
-      for (int idir = 0;idir < DIM;idir++)
-        {
-          retval[idir] += x[idir];
-        }
+      retval[idir] += x[idir];
     }
+  }
   for (int idir = 0; idir < DIM; idir++)
-    {
-      retval[idir]/=VERTICES;
-    }
+  {
+    retval[idir] /= VERTICES;
+  }
   return retval;
 }
 
 
 double FEGrid::elementArea(const int& a_eltNumber) const
 {
-  const Element& e = m_elements[a_eltNumber];
-  const Node& n=m_nodes[e[0]];
+  const Element &e = m_elements[a_eltNumber];
+  const Node &n = m_nodes[e[0]];
   array<double, DIM> xbase = n.getPosition();
-  array<array<double, VERTICES-1>, DIM> dx;
-  for (int ivert = 1;ivert < VERTICES; ivert++)
+  array<array<double, VERTICES - 1>, DIM> dx;
+  for (int ivert = 1; ivert < VERTICES; ivert++)
+  {
+    int otherNodeNumber = e[ivert];
+    dx[ivert - 1] = m_nodes[otherNodeNumber].getPosition();
+    for (int idir = 0; idir < DIM; idir++)
     {
       int otherNodeNumber = e[ivert];
      dx[ivert-1] = m_nodes[otherNodeNumber].getPosition();
@@ -422,14 +428,14 @@ double FEGrid::elementArea(const int& a_eltNumber) const
 //   double xbase[DIM];
 //   n.getPosition(xbase);
 //   double value = 0;
-  
+
 //   for (int idir = 0; idir < DIM; idir++)
 //     {
 //       value += a_xVal[idir] - xbase[idir];
 //     }
 //   return value;
 // }
-const Node& FEGrid::getNode(const int& a_eltNumber,const int& a_localNodeNumber) const
+const Node &FEGrid::getNode(const int &a_eltNumber, const int &a_localNodeNumber) const
 {
   return m_nodes[m_elements[a_eltNumber][a_localNodeNumber]];
 }
@@ -448,68 +454,65 @@ int FEGrid::getNumInteriorNodes() const
   return m_numInteriorNodes;
 }
 
-const Element& FEGrid::element(int i) const
+const Element &FEGrid::element(int i) const
 {
   return m_elements[i];
 }
-const Node& FEGrid::node(int i) const
+const Node &FEGrid::node(int i) const
 {
   return m_nodes[i];
 }
 
-
-const char* FEWrite(FEGrid* a_grid, const char* a_filename)
+const char *FEWrite(FEGrid *a_grid, const char *a_filename)
 {
   vector<double> data(a_grid->getNumNodes(), 0.0);
   return FEWrite(a_grid, &data, a_filename);
 }
 
 int fileCount = 0;
-const char* FEWrite(FEGrid* a_grid)
+const char *FEWrite(FEGrid *a_grid)
 {
   char filename[10];
-  snprintf(filename,10,"grid%d.vtk",fileCount);
+  snprintf(filename, 10, "grid%d.vtk", fileCount);
   return FEWrite(a_grid, filename);
 }
 
-
-const char* FEWrite(FEGrid* a_grid, vector<double>* a_scalarField)
+const char *FEWrite(FEGrid *a_grid, vector<double> *a_scalarField)
 {
   char filename[10];
-  snprintf(filename,10,"FEData%d.vtk",fileCount);
+  snprintf(filename, 10, "FEData%d.vtk", fileCount);
   return FEWrite(a_grid, a_scalarField, filename);
 }
 
-
-const char* FEWrite(FEGrid* a_grid, vector<double>* a_scalarField, const char* a_filename)
+const char *FEWrite(FEGrid *a_grid, vector<double> *a_scalarField, const char *a_filename)
 {
   int nNodes = a_scalarField->size();
   assert(a_grid->getNumNodes() == nNodes);
   vector<float> scalarField;
-  for (int k = 0; k< nNodes; k++)
-    {
-      scalarField.push_back((*a_scalarField)[k]);
-    }
-  float* vars[1];
+  for (int k = 0; k < nNodes; k++)
+  {
+    scalarField.push_back((*a_scalarField)[k]);
+  }
+  float *vars[1];
   vars[0] = &(scalarField[0]);
   int vardim[1] = {1};
   int centering[1] = {1};
   const char * const varnames[] = { "nodeData" };
   
   // Always 3d coordinates
-  vector<float> pts(3*nNodes);
-  for(int i=0; i<nNodes; i++)
+  vector<float> pts(3 * nNodes);
+  for(int i = 0; i < nNodes; i++)
     {
-      int p = 3*i;
+      int p = 3 * i;
       array<double, DIM> x = a_grid->node(i).getPosition();
       pts[p] = x[0];
-      pts[p+1]=x[1];
+      pts[p + 1] = x[1];
       if (DIM == 2) 
       {
-        pts[p+2]=0.0;
+        pts[p + 2] = 0.0;
       }
       else {
-        pts[p+2] = x[2];
+        pts[p + 2] = x[2];
       }
     }
 
@@ -524,7 +527,7 @@ const char* FEWrite(FEGrid* a_grid, vector<double>* a_scalarField, const char* a
   }
 
   vector<int> conns(VERTICES*ncell);
-  for(int i=0; i<ncell; i++)
+  for(int i = 0; i < ncell; i++)
     {
       array<int, VERTICES> vertices = a_grid->element(i).vertices();
       int e = VERTICES * i;
