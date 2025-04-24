@@ -55,10 +55,6 @@ FEGrid::FEGrid(const std::string& a_nodeFileName, const std::string& a_elementFi
   elements>>ncell>>nt>>attributes;
   array<int, VERTICES> vert;
   m_elements.resize(ncell);
-  if (DIM == 3) 
-      { 
-        cout<<"DIM 3"<<endl;
-      };
   for(int i=0; i<ncell; i++)
     {
       int cellID;
