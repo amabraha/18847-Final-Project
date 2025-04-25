@@ -54,6 +54,18 @@ FEPoissonOperator<T>::FEPoissonOperator(const FEGrid &a_grid)
             }
         }
     }
+
+    //apply boundary conditions to L
+    for (int i = 0; i < m_grid.getNumNodes(); ++i)
+    {
+        const Node &n = m_grid.node(i);
+        if (n.isInterior())
+            continue;
+
+        m_matrix.zeroRow(i); // wipe old Laplace row
+        array<int, 2> d = {i, i};
+        m_matrix[d] = T(1); // 1·φ_i = g
+    }
 }
 
 template <typename T>

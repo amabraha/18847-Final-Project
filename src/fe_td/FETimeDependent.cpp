@@ -45,7 +45,7 @@ void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out, co
   }
 
   JacobiSolver<double> solver;
-  //ehh just picked 1000 and 1e-6 arbitrarily
+  //ehh just picked 1000 and 1e-7 arbitrarily
   solver.solve(a_phi_out, A, rhs, 1E-7, 1000);
 
   apply_boundary(a_phi_out, time+dt, a_boundary_cond);
@@ -88,6 +88,11 @@ void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_
 
   double t = 0;
   int file_counter = 0;
+
+  string filename = a_filename+to_string(file_counter)+".vtk";
+  FEWrite(&m_grid, &a_phi_out, filename.c_str());
+  file_counter += 1;
+  
   //keep stepping by dt until we can't anymore
   while(t < time)
   {
