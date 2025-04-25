@@ -80,7 +80,9 @@ int main(int argc, char **argv)
   auto Phi_omega = [](const Node &n) -> double
   {
     // example boundary condition:
-    return std::sin(M_PI * n.getPosition()[0]);
+    // return std::sin(M_PI * n.getPosition()[0]);
+    // exact boundary condition
+    return sourceFunction(n.getPosition());
   };
   op.applyDirichletBC(A, rhs, Phi_omega);
 

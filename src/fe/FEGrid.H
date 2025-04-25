@@ -40,6 +40,7 @@ public:
   const Element& element(int i) const;
   /// Access a node by indexing into m_nodes.
   const Node& node(int i) const;
+  int add_upper_node(const Node &node, double height);
   private:                            
   vector<Node > m_nodes;
   vector<Element > m_elements;

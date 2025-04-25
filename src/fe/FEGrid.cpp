@@ -22,6 +22,30 @@ FEGrid::FEGrid() : m_numInteriorNodes(0)
 {
 }
 
+/* Helper for 3D extrusion */
+int FEGrid::add_upper_node(const Node &node, double height)
+{
+  array<double, DIM> x;
+  array<double, DIM> x_0 = node.getPosition();
+  
+  // Grow the layer
+  x[0] = x_0[0];
+  x[1] = x_0[1];
+  x[2] = x_0[2] + height;
+
+  int in_id = -1;
+  bool is_in = node.isInterior();
+  if (is_in) {
+    in_id = m_numInteriorNodes;
+    m_numInteriorNodes++;
+  }
+
+  Node node_new = Node(x, in_id, is_in);
+  // Add new node
+  m_nodes.push_back(node_new);
+  return m_nodes.size() - 1;
+}
+
 FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFileName)
 {
   ifstream nodes(a_nodeFileName.c_str());
@@ -37,6 +61,10 @@ FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFi
     int vertex, type;
     array<double, DIM> x;
     nodes >> vertex >> x[0] >> x[1] >> type;
+    if (DIM == 3)
+    {
+      x[2] = 0.0;
+    }
     vertex--;
     if (type == 1)
     {
@@ -54,6 +82,11 @@ FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFi
   elements >> ncell >> nt >> attributes;
   array<int, VERTICES> vert;
   m_elements.resize(ncell);
+  if (DIM == 3)
+  {
+    // Add new elements for 3d extrusion
+    m_elements.resize(ncell * 3);
+  }
   for (int i = 0; i < ncell; i++)
   {
     int cellID;
@@ -61,34 +94,60 @@ FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFi
     vert[0]--;
     vert[1]--;
     vert[2]--;
+    cellID--;
 
-    // 2d extrude into 3d, add apex point
+    // 2d extrude into 3d, grow a prism layer and split into 3 tetras
     if (DIM == 3) 
     {
-      int vertex = m_nodes.size();
-      m_nodes.resize(vertex + 1);
-      array<double, DIM> x;
-      array<double, DIM> x_a = m_nodes[vert[0]].getPosition();
-      array<double, DIM> x_b = m_nodes[vert[1]].getPosition();
-      array<double, DIM> x_c = m_nodes[vert[2]].getPosition();
+      Node& v1 = m_nodes[vert[0]];
+      Node& v2 = m_nodes[vert[1]];
+      Node& v3 = m_nodes[vert[2]];
+      array<double, DIM> x_1 = v1.getPosition();
+      array<double, DIM> x_2 = v2.getPosition();
+      array<double, DIM> x_3 = v3.getPosition();
 
-      // Compute centroid
-      x[0] = (x_a[0] + x_b[0] + x_c[0]) / 3.0;
-      x[1] = (x_a[1] + x_b[1] + x_c[1]) / 3.0;
-
-      // Compute area (cross product)
-      double area = 0.5 * fabs((x_b[0]-x_a[0])*(x_c[1]-x_a[1])-(x_c[0]-x_a[0])*(x_b[1] - x_a[1]));
+      // Compute 2D area (cross product of vectors)
+      double area = 0.5 * fabs((x_2[0]-x_1[0])*(x_3[1]-x_1[1])-(x_3[0]-x_1[0])*(x_2[1] - x_1[1]));
 
       // Compute height to preserve h: the 3D tetrahedron volumes have a cube root equivalent to the square root of the original 2D elements
-      x[2] = 3.0 * sqrt(area);
+      double h = 3.0 * sqrt(area);
 
-      // Add apex node as boundary node
-      m_nodes[vertex] = Node(x, -1, false);
-      vert[3] = vertex;
+      // Grow the upper layer into a prism
+      int v4_id = add_upper_node(v1, h);
+      int v5_id = add_upper_node(v2, h);
+      int v6_id = add_upper_node(v3, h);
+      // cout << "v4_id " << v4_id << endl;
+
+      // Divide into 3 tetras
+      // ref: https://www.researchgate.net/publication/221561839_How_to_Subdivide_Pyramids_Prisms_and_Hexahedra_into_Tetrahedra
+      // Tetra 1: v1, v4, v5, v6
+      // Tetra 2: v1, v2, v5, v6
+      // Tetra 3: v1, v2, v3, v6
+      array<int, VERTICES> tet1;
+      tet1[0] = vert[0];
+      tet1[1] = v4_id;
+      tet1[2] = v5_id;
+      tet1[3] = v6_id;
+      array<int, VERTICES> tet2;
+      tet2[0] = vert[0];
+      tet2[1] = vert[1];
+      tet2[2] = v5_id;
+      tet2[3] = v6_id;
+      array<int, VERTICES> tet3;
+      tet3[0] = vert[0];
+      tet3[1] = vert[1];
+      tet3[2] = vert[2];
+      tet3[3] = v6_id;
+      
+
+      // Add all tetras
+      m_elements[cellID * 3] = Element(tet1);
+      m_elements[cellID * 3 + 1] = Element(tet2);
+      m_elements[cellID * 3 + 2] = Element(tet3);
     }
-
-    cellID--;
-    m_elements[cellID] = Element(vert);
+    else {
+      m_elements[cellID] = Element(vert);
+    }
   }
 };
 
@@ -234,56 +293,93 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
     {
       int type = out.pointmarkerlist[vertex];
       array<double, DIM> x;
-      x[0] = out.pointlist[vertex*2];
-      x[1] = out.pointlist[vertex*2+1];
+      x[0] = out.pointlist[vertex * 2];
+      x[1] = out.pointlist[vertex * 2 + 1];
+      if (DIM == 3)
+      {
+        x[2] = 0.0;
+      }
       if(type == 1)
-	{
-	  m_nodes[vertex] = Node(x,-1, false);
-	}
+      {
+        m_nodes[vertex] = Node(x,-1, false);
+      }
       else
-	{
-	  m_nodes[vertex] = Node(x, m_numInteriorNodes, true);
-	  m_numInteriorNodes++;
-	}
+      {
+        m_nodes[vertex] = Node(x, m_numInteriorNodes, true);
+        m_numInteriorNodes++;
+      }
     }
 
   // Read elements from trianglelist
   int ncell;
   ncell = out.numberoftriangles;
   m_elements.resize(ncell);
-  for(int i=0; i<ncell; i++)
+  if (DIM == 3)
+  {
+    // Add new elements for 3d extrusion
+    m_elements.resize(ncell * 1);
+  }
+  for(int i = 0; i < ncell; i++)
     {
       int cellID = i;
       array<int, VERTICES> vert;
       // read vertices (node ID)
-      vert[0] = out.trianglelist[cellID*3] - 1; // 1-based indexing
-      vert[1] = out.trianglelist[cellID*3+1] - 1;
-      vert[2] = out.trianglelist[cellID*3+2] - 1;
-      // 2d extrude into 3d, add apex point
+      vert[0] = out.trianglelist[cellID * 3] - 1; // 1-based indexing
+      vert[1] = out.trianglelist[cellID * 3 + 1] - 1;
+      vert[2] = out.trianglelist[cellID * 3 + 2] - 1;
+      // 2d extrude into 3d, grow a prism layer and split into 3 tetras
       if (DIM == 3) 
       {
         int vertex = m_nodes.size();
-        m_nodes.resize(vertex + 1);
-        array<double, DIM> x;
-        array<double, DIM> x_a = m_nodes[vert[0]].getPosition();
-        array<double, DIM> x_b = m_nodes[vert[1]].getPosition();
-        array<double, DIM> x_c = m_nodes[vert[2]].getPosition();
-
-        // Compute centroid
-        x[0] = (x_a[0] + x_b[0] + x_c[0]) / 3.0;
-        x[1] = (x_a[1] + x_b[1] + x_c[1]) / 3.0;
+        m_nodes.resize(vertex + 3);
+        Node v1 = m_nodes[vert[0]];
+        Node v2 = m_nodes[vert[1]];
+        Node v3 = m_nodes[vert[2]];
+        array<double, DIM> x_1 = v1.getPosition();
+        array<double, DIM> x_2 = v2.getPosition();
+        array<double, DIM> x_3 = v3.getPosition();
 
         // Compute 2D area (cross product of vectors)
-        double area = 0.5 * fabs((x_b[0]-x_a[0])*(x_c[1]-x_a[1])-(x_c[0]-x_a[0])*(x_b[1] - x_a[1]));
+        double area = 0.5 * fabs((x_2[0]-x_1[0])*(x_3[1]-x_1[1])-(x_3[0]-x_1[0])*(x_2[1] - x_1[1]));
 
         // Compute height to preserve h: the 3D tetrahedron volumes have a cube root equivalent to the square root of the original 2D elements
-        x[2] = 3.0 * sqrt(area);
+        double h = 3.0 * sqrt(area);
 
-        // Add apex node as boundary node
-        m_nodes[vertex] = Node(x, -1, false);
-        vert[3] = vertex;
+        // Grow the upper layer into a prism
+        int v4_id = add_upper_node(v1, h);
+        int v5_id = add_upper_node(v2, h);
+        int v6_id = add_upper_node(v3, h);
+        cout << "v6 id " << v6_id << endl;
+
+        // Divide into 3 tetras
+        // ref: https://www.researchgate.net/publication/221561839_How_to_Subdivide_Pyramids_Prisms_and_Hexahedra_into_Tetrahedra
+        // Tetra 1: v1, v4, v5, v6
+        // Tetra 2: v1, v2, v5, v6
+        // Tetra 3: v1, v2, v3, v6
+        array<int, VERTICES> tet1;
+        tet1[0] = vert[0];
+        tet1[1] = v4_id;
+        tet1[2] = v5_id;
+        tet1[3] = v6_id;
+        array<int, VERTICES> tet2;
+        tet2[0] = vert[0];
+        tet2[1] = vert[1];
+        tet2[2] = v5_id;
+        tet2[3] = v6_id;
+        array<int, VERTICES> tet3;
+        tet3[0] = vert[0];
+        tet3[1] = vert[1];
+        tet3[2] = vert[2];
+        tet3[3] = v6_id;
+
+        // Add all tetras
+        m_elements[cellID] = Element(tet1);
+        // m_elements[cellID * 3 + 1] = Element(tet2);
+        // m_elements[cellID * 3 + 2] = Element(tet3);
       }
-      m_elements[cellID] = Element(vert);
+      else {
+        m_elements[cellID] = Element(vert);
+      }
     }
 
   // Clean up

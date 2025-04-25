@@ -42,7 +42,7 @@ run: fesolver.exe
 
 # Set DIM as 3 on command line, i.e. make extrude DIM=3
 extrude: fesolver.exe 
-	./fesolver.exe ../FEData/B.2 --extrude
+	./fesolver.exe ../FEData/A --extrude
 
 poly: fesolver.exe 
 	./fesolver.exe ../FEData/test 2
