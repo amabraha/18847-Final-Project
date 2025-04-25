@@ -102,6 +102,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
 {
   struct triangulateio in, out;
   in.numberofcorners = 3;
+  in.numberofregions = 0;
 
   ifstream poly(a_polyFileName.c_str());
 
@@ -380,7 +381,7 @@ array<double, DIM> FEGrid::centroid(const int& a_eltNumber) const
     retval[idir] /= VERTICES;
   }
   return retval;
-}
+};
 
 
 double FEGrid::elementArea(const int& a_eltNumber) const
@@ -401,7 +402,8 @@ double FEGrid::elementArea(const int& a_eltNumber) const
         {
           dx[ivert-1][idir] -=xbase[idir];
         }
-    }        
+    } 
+  }       
   if (DIM == 2) 
   {
     // WARNING: the following calculation is correct for triangles in 2D *only*.
