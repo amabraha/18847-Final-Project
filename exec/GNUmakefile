@@ -37,8 +37,8 @@ fesolver_TD.exe: GNUmakefile $(OBJS) FEMain_TD.cpp
 	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver_TD.exe FEMain_TD.cpp  $(OBJS)
 
 run_TD: fesolver_TD.exe 
-	rm -fr vtk_output/*.vtk rhs_output/*.vtk phi_output/*.vtk
-	./fesolver_TD.exe ../FEData/td
+	rm -fr */*.vtk
+	./fesolver_TD.exe ../FEData/td 0.05
 
 poly: fesolver.exe 
 	./fesolver.exe ../FEData/test 2
@@ -47,7 +47,7 @@ test_boundary: fesolver.exe
 	./fesolver.exe ../FEData/td 100
 
 clean:
-	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM vtk_output/*.vtk rhs_output/*.vtk phi_output/*.vtk *.vtk *.o *.d
+	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM */*.vtk *.vtk *.o *.d
 
 # Add targets for different data types
 run_float:

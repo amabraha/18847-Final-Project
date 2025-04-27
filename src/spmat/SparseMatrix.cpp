@@ -226,8 +226,8 @@ template <typename T>
 void SparseMatrix<T>::zeroRow(int r)
 {
   assert(r >= 0 && r < static_cast<int>(m_m));
-  m_colIndex[r] = std::vector<int>();
-  m_data[r] = vector<T>();
+  m_colIndex[r] = vector<int>(0);
+  m_data[r] = vector<T>(0);
 }
 
 // Explicit template instantiations
