@@ -281,7 +281,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   /* Refine the triangulation according to the attached */
   /*   triangle area constraints.                       */
   char switches[20];
-  snprintf(switches, sizeof(switches), "pqa%f", max_area);
+  snprintf(switches, sizeof(switches), "pq34a%f", max_area);
   triangulate(switches, &in, &out, (struct triangulateio *) NULL);
 
   // Read nodes from pointlist
