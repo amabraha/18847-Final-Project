@@ -29,26 +29,27 @@ void FETimeDependent::apply_boundary(vector<double>& a_phi, double time, const f
 
 void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond)
 {
-  apply_boundary(a_phi_out, time, a_boundary_cond);
+  // apply_boundary(a_phi_out, time, a_boundary_cond);
 
   vector<double> rhs = vector<double>(a_phi_out.size());
   //copy -m_L to A
-  SparseMatrix<double> A(m_L, -1);
+  SparseMatrix<double> A(m_L, 1);
 
   for (int i = 0; i < a_phi_out.size(); i ++)
   {
     //for the rhs this constructs 1/dt phi(t) - f(t + dt)
-    rhs[i] = a_phi_out[i]/dt - m_f(time+dt)[i];
+    rhs[i] = a_phi_out[i]/dt + m_f(time+dt)[i];
 
     //this constructs 1/dt I - L
-    A.access(array<int, 2>{i,i}) += 1/dt;
+    array<int, 2> idx = {i, i};
+    A[idx] += 1/dt;
   }
 
   JacobiSolver<double> solver;
   //ehh just picked 1000 and 1e-7 arbitrarily
-  solver.solve(a_phi_out, A, rhs, 1E-7, 1000);
+  solver.solve(a_phi_out, A, rhs, 1E-8, 1000);
 
-  apply_boundary(a_phi_out, time+dt, a_boundary_cond);
+  // apply_boundary(a_phi_out, time+dt, a_boundary_cond);
 }
 
 void FETimeDependent::solve(double time, double dt, vector<double>& a_phi_out, 

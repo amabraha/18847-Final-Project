@@ -39,12 +39,13 @@ double derivedf(double time, array<double, DIM> x)
 double sourcePhi2(double time, array<double, DIM> x)
 {
   double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-  return 4.0*Rsquared;
+  return x[0]+2*x[1];
 
 }
 
 double derivedf2(double time, array<double, DIM> x)
 {
+  return 0.0;
   double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
   
   double d2phidx2 = 8.0;
@@ -91,6 +92,7 @@ int main(int argc, char** argv)
   {
     Node n = grid.node(nodeidx);
     initial_conditions[nodeidx] = sourcePhi2(.005, n.getPosition());
+    cout << initial_conditions[nodeidx] << endl;
   }
 
   function<vector<double>(double)> rhs_f = [&grid, &op](double time)
@@ -117,6 +119,7 @@ int main(int argc, char** argv)
     double x = n.getPosition()[0];
     double y = n.getPosition()[1];
     double Rsquared = (y-9)*(y-9)+x*x;
+    return 0.0;
     return sourcePhi2(time,n.getPosition());
     if (Rsquared <= 26)
     {
@@ -148,6 +151,7 @@ int main(int argc, char** argv)
     if (n.isInterior())
     {
       double newerr = abs(phi_nodes[nodeidx] - sourcePhi2(finaltime, n.getPosition()));
+      newerr = abs(phi_nodes[nodeidx]);
       if (newerr > maxerr)
       {
         maxerr = newerr;

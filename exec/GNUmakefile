@@ -38,10 +38,13 @@ fesolver_TD.exe: GNUmakefile $(OBJS) FEMain_TD.cpp
 
 run_TD: fesolver_TD.exe 
 	rm -fr vtk_output/*.vtk rhs_output/*.vtk phi_output/*.vtk
-	./fesolver_TD.exe ../FEData/td 0.02
+	./fesolver_TD.exe ../FEData/td
 
 poly: fesolver.exe 
 	./fesolver.exe ../FEData/test 2
+
+test_boundary: fesolver.exe 
+	./fesolver.exe ../FEData/td 100
 
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe *.dSYM vtk_output/*.vtk rhs_output/*.vtk phi_output/*.vtk *.vtk *.o *.d

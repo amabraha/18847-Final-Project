@@ -17,6 +17,30 @@ float sourceFunction(array<double, DIM> x)
   return val;
 }
 
+
+
+
+double sourcePhi2(double time, array<double, DIM> x)
+{
+  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
+  return x[0]+2*x[1];
+  return 4.0*Rsquared;
+
+}
+
+double derivedf2(double time, array<double, DIM> x)
+{
+  return 0.0;
+  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
+  
+  double d2phidx2 = 8.0;
+  double d2phidy2 = 8.0;
+  double dphidt = 0.0;
+
+  return d2phidx2 + d2phidy2 - dphidt;
+
+}
+
 int main(int argc, char **argv)
 {
   if(argc > 3)
@@ -55,7 +79,7 @@ int main(int argc, char **argv)
   for (int i = 0; i < nElements; ++i)
   {
     auto centroid = grid.centroid(i);
-    sourceTerms[i] = sourceFunction(centroid);
+    sourceTerms[i] = derivedf2(0.0, centroid);
   }
 
   // --- build RHS (global) ---
@@ -66,18 +90,45 @@ int main(int argc, char **argv)
   auto Phi_omega = [](const Node &n) -> double
   {
     // example boundary condition:
-    return std::sin(M_PI * n.getPosition()[0]);
+    return sourcePhi2(0.0, n.getPosition());
   };
   op.applyDirichletBC(A, rhs, Phi_omega);
 
   // --- solve the full system for phi at all nodes ---
   vector<double> phi;
   JacobiSolver<double> solver;
-  double residual = solver.solve(phi, A, rhs, 1e-6, 1000);
+  double residual = solver.solve(phi, A, rhs, 1e-9, 1000);
 
   // --- write out VTK with boundary values baked in ---
   FEWrite(&grid, &phi, "solution.vtk");
 
   cout << "Final Solver residual was " << residual << endl;
+
+
+  //error analysis using infinity norm
+  double maxerr = 0.0;
+
+  for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
+  {
+    Node n = grid.node(nodeidx);
+    if (n.isInterior())
+    {
+      double newerr = abs(phi[nodeidx] - sourcePhi2(0.0, n.getPosition()));
+      if (newerr > maxerr)
+      {
+        maxerr = newerr;
+      }
+    }
+  }
+
+  cout << "infinity norm of difference between calculated phi and source phi is: " << maxerr << endl;
+
+  vector<double> phi_vector(grid.getNumNodes());
+  for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
+  {
+    Node n = grid.node(nodeidx);
+    phi_vector[nodeidx] = sourcePhi2(0.0, n.getPosition()) - phi[nodeidx];
+  }
+  FEWrite(&grid, &phi_vector, "ref_solution");
   return 0;
 }
