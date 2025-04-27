@@ -8,16 +8,22 @@
 using namespace std;
 
 
-float sourcePhi(double time, array<double, DIM> x)
+double sourcePhi(double time, array<double, DIM> x)
 {
+  return 2*x[0]+x[1]+ 3*time;
   double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
+  return Rsquared;
+  return Rsquared + 3*sin(time);
   return 4.0*sin(5.0*Rsquared*sin(time));
 
 }
 
-float derivedf(double time, array<double, DIM> x)
+double derivedf(double time, array<double, DIM> x)
 {
+  return 0+3;
   double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
+  return 4;
+  return 4+3*cos(time);
 
   //calculations for partials:
   // dphi/dx = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)
@@ -31,7 +37,7 @@ float derivedf(double time, array<double, DIM> x)
   double d2phidy2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
   double dphidt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time);
 
-  return d2phidx2 + d2phidy2 - dphidt;
+  return d2phidx2 + d2phidy2 + dphidt;
 
 }
 
@@ -65,6 +71,12 @@ int main(int argc, char** argv)
 
   vector<double> initial_conditions(grid.getNumNodes());
 
+  for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
+    {
+      Node n = grid.node(nodeidx);
+      initial_conditions[nodeidx] = sourcePhi(0, n.getPosition());
+    }
+
   function<vector<double>(double)> rhs_f = [&grid, &op](double time)
   {
 
@@ -89,6 +101,7 @@ int main(int argc, char** argv)
     double x = n.getPosition()[0];
     double y = n.getPosition()[1];
     double Rsquared = (y-9)*(y-9)+x*x;
+    return sourcePhi(time, n.getPosition());
     if (Rsquared <= 26)
     {
       return -1.0;
@@ -103,7 +116,10 @@ int main(int argc, char** argv)
 
   vector<double> phi_nodes;
 
-  TDsolver.solve_write(1, .005, phi_nodes, initial_conditions, boundary_cond, "vtk_output/solution");
+  double finaltime = 1;
+  double timestep = .0005;
+
+  TDsolver.solve_write(finaltime, timestep, phi_nodes, initial_conditions, boundary_cond, "vtk_output/solution");
 
 
 
@@ -115,15 +131,55 @@ int main(int argc, char** argv)
     Node n = grid.node(nodeidx);
     if (n.isInterior())
     {
-      double newerr = abs(phi_nodes[n.getInteriorNodeID()] - sourcePhi(1, n.getPosition()));
+      double newerr = abs(phi_nodes[nodeidx] - sourcePhi(finaltime, n.getPosition()));
       if (newerr > maxerr)
       {
+        cout << nodeidx << " " << n.getPosition()[0] << " " << n.getPosition()[1] << " " << newerr << endl;
         maxerr = newerr;
       }
     }
   }
+  cout << "infinity norm of difference between calculated phi and source phi is: " << maxerr << endl;
+ 
+   
+ 
+  double t = 0;
+  double dt = timestep;
+  int file_counter = 0;
 
-  cout << "infinity norm of calculated phi and source phi is: " << maxerr << endl;
+
+  vector<double> phi_vector(grid.getNumNodes());
+  //keep stepping by dt until we can't anymore
+  while(t < finaltime)
+  {
+    if (t + dt > finaltime)
+    {
+      t = finaltime;
+    } 
+    else 
+    {
+      t += dt;
+    }
+    
+  
+
+    for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
+    {
+      Node n = grid.node(nodeidx);
+      phi_vector[nodeidx] = sourcePhi(t, n.getPosition());
+    }
+
+    //visit writing process
+
+    string filename = string("phi_output/solution")+to_string(file_counter)+".vtk";
+    FEWrite(&grid, &phi_vector, filename.c_str());
+
+    filename = string("rhs_output/solution")+to_string(file_counter)+".vtk";
+    vector<double> rhs_vector = rhs_f(t);
+    FEWrite(&grid, &rhs_vector, filename.c_str());
+    file_counter += 1;
+
+  }
   
   return 0;
   

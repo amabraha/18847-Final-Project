@@ -33,12 +33,12 @@ void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out, co
 
   vector<double> rhs = vector<double>(a_phi_out.size());
   //copy -m_L to A
-  SparseMatrix<double> A(m_L, -1);
+  SparseMatrix<double> A(m_L, 1);
 
   for (int i = 0; i < a_phi_out.size(); i ++)
   {
     //for the rhs this constructs 1/dt phi(t) - f(t + dt)
-    rhs[i] = a_phi_out[i]/dt - m_f(time+dt)[i];
+    rhs[i] = a_phi_out[i]/dt + m_f(time+dt)[i];
 
     //this constructs 1/dt I - L
     A.access(array<int, 2>{i,i}) += 1/dt;
