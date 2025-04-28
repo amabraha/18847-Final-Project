@@ -46,8 +46,9 @@ class FETimeDependent
   function<vector<double>(double)> m_f;
   FEGrid m_grid;
 
-  ///steps a_phi_out from time to time+dt
+  ///steps a_phi_out from time to time+dt using backward euler
   void step(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond);
+  ///steps a_phi_out from time to time+dt using RK4
   void stepRK4(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond);
 
   ///forces a vector to match boundary conditions at boundary nodes

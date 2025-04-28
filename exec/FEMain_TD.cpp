@@ -80,18 +80,7 @@ int main(int argc, char** argv)
 
   function<double(const Node &, double)> boundary_cond = [](const Node &n, double time)
   {
-    double x = n.getPosition()[0];
-    double y = n.getPosition()[1];
-    double Rsquared = (y-9)*(y-9)+x*x;
     return sourcePhi(time, n.getPosition());
-    if (Rsquared <= 26)
-    {
-      return -1.0;
-    } else if (Rsquared >= 35)
-    {
-      return 1.0;
-    }
-    return 0.0;
   };
 
   FETimeDependent TDsolver(op.matrix(), rhs_f, grid);
