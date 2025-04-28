@@ -173,7 +173,7 @@ int main(int argc, char** argv)
       double newerr = abs(phi_nodes[nodeidx] - sourcePhi(finaltime, n.getPosition()));
       if (newerr > maxerr)
       {
-        cout << nodeidx << " " << n.getPosition()[0] << " " << n.getPosition()[1] << " " << newerr << endl;
+        // cout << nodeidx << " " << n.getPosition()[0] << " " << n.getPosition()[1] << " " << newerr << endl;
         maxerr = newerr;
       }
     }
@@ -212,10 +212,6 @@ int main(int argc, char** argv)
 
     string filename = string("phi_output/solution")+to_string(file_counter)+".vtk";
     FEWrite(&grid, &phi_vector, filename.c_str());
-
-    filename = string("rhs_output/solution")+to_string(file_counter)+".vtk";
-    vector<double> rhs_vector = rhs_f(t);
-    FEWrite(&grid, &rhs_vector, filename.c_str());
     file_counter += 1;
 
   }
