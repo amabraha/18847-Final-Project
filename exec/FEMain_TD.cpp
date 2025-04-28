@@ -8,62 +8,17 @@
 using namespace std;
 
 
+//our reference phi
 double sourcePhi(double time, array<double, DIM> x)
 {
-  return 2*x[0]+x[1]+ 3*time;
-  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-<<<<<<< HEAD
-  return 4.0*sin(2.0*Rsquared*sin(time/3.0));
-=======
-  return Rsquared;
-  return Rsquared + 3*sin(time);
-  return 4.0*sin(5.0*Rsquared*sin(time));
->>>>>>> b19cea0 (Changed the diffeq for time dependent. Removed print from Jacobi Solver.)
+  return 2*x[0]+x[1]+3*time;
 
 }
 
 double derivedf(double time, array<double, DIM> x)
 {
+  //want to return d^2phi/dx^2 + d^2phi/dy^2 + dphi/dt
   return 0+3;
-  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-  return 4;
-  return 4+3*cos(time);
-
-  //calculations for partials:
-  // dphi/dx = 4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*2*x[0]*sin(time/3.0)
-  // d^2phi/dx^2 = -4.0*sin(2.0*Rsquared*sin(time/3.0))*2.0*2*x[0]*sin(time/3.0)*2.0*2*x[0]*sin(time/3.0)+4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*2*sin(time/3.0)
-  
-  // dphi/dy = 4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*2*(x[1]-9)*sin(time/3.0)
-  // d^2phi/dy^2 = -4.0*sin(2.0*Rsquared*sin(time/3.0))*2.0*2*(x[1]-9)*sin(time/3.0)*2.0*2*(x[1]-9)*sin(time/3.0)+4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*2*sin(time/3.0)
-
-  // dphi/dt = 4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*Rsquared*cos(time/3.0)*(1/3.0)
-  double d2phidx2 = -4.0*sin(2.0*Rsquared*sin(time/3.0))*2.0*2*x[0]*sin(time/3.0)*2.0*2*x[0]*sin(time/3.0)+4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*2*sin(time/3.0);
-  double d2phidy2 = -4.0*sin(2.0*Rsquared*sin(time/3.0))*2.0*2*(x[1]-9)*sin(time/3.0)*2.0*2*(x[1]-9)*sin(time/3.0)+4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*2*sin(time/3.0);
-  double dphidt = 4.0*cos(2.0*Rsquared*sin(time/3.0))*2.0*Rsquared*cos(time/3.0)*(1/3.0);
-
-  return d2phidx2 + d2phidy2 - dphidt;
-
-}
-
-
-double sourcePhi2(double time, array<double, DIM> x)
-{
-  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-  return x[0]+2*x[1];
-
-}
-
-double derivedf2(double time, array<double, DIM> x)
-{
-  return 0.0;
-  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-  
-  double d2phidx2 = 8.0;
-  double d2phidy2 = 8.0;
-  double dphidt = 0.0;
-
-  return d2phidx2 + d2phidy2 + dphidt;
-
 }
 
 
@@ -95,19 +50,12 @@ int main(int argc, char** argv)
   
 
   vector<double> initial_conditions(grid.getNumNodes());
-    
   
-
-  for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
-  {
-    Node n = grid.node(nodeidx);
-    initial_conditions[nodeidx] = sourcePhi2(.005, n.getPosition());
-    cout << initial_conditions[nodeidx] << endl;
-  }
 
   for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
     {
       Node n = grid.node(nodeidx);
+      //populate initial conditions with phi at 0
       initial_conditions[nodeidx] = sourcePhi(0, n.getPosition());
     }
 
@@ -122,7 +70,7 @@ int main(int argc, char** argv)
     for(int i=0; i<nElements; i++)
     {
       centroid = grid.centroid(i);
-      sourceTerms[i] = derivedf2(time, centroid);
+      sourceTerms[i] = derivedf(time, centroid);
     }
   
     vector<double> rhs;
@@ -135,12 +83,7 @@ int main(int argc, char** argv)
     double x = n.getPosition()[0];
     double y = n.getPosition()[1];
     double Rsquared = (y-9)*(y-9)+x*x;
-<<<<<<< HEAD
-    return 0.0;
-    return sourcePhi2(time,n.getPosition());
-=======
     return sourcePhi(time, n.getPosition());
->>>>>>> b19cea0 (Changed the diffeq for time dependent. Removed print from Jacobi Solver.)
     if (Rsquared <= 26)
     {
       return -1.0;
@@ -156,7 +99,7 @@ int main(int argc, char** argv)
   vector<double> phi_nodes;
 
   double timestep = .005;
-  double finaltime = 1;
+  double finaltime = 8;
 
   TDsolver.solve_write(finaltime, timestep, phi_nodes, initial_conditions, boundary_cond, "vtk_output/solution");
 
@@ -164,6 +107,7 @@ int main(int argc, char** argv)
 
   //error analysis using infinity norm
   double maxerr = 0.0;
+  double refphi_norm = 0.0;
 
   for (int nodeidx = 0; nodeidx < grid.getNumNodes(); nodeidx ++)
   {
@@ -171,14 +115,20 @@ int main(int argc, char** argv)
     if (n.isInterior())
     {
       double newerr = abs(phi_nodes[nodeidx] - sourcePhi(finaltime, n.getPosition()));
+      double newrefphi_norm = abs(sourcePhi(finaltime, n.getPosition()));
       if (newerr > maxerr)
       {
         // cout << nodeidx << " " << n.getPosition()[0] << " " << n.getPosition()[1] << " " << newerr << endl;
         maxerr = newerr;
       }
+      if (newrefphi_norm > refphi_norm)
+      {
+        refphi_norm = newrefphi_norm;
+      }
     }
   }
   cout << "infinity norm of difference between calculated phi and source phi is: " << maxerr << endl;
+  cout << "relative error is: " << maxerr/refphi_norm << endl;
  
    
  

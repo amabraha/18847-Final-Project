@@ -48,6 +48,7 @@ class FETimeDependent
 
   ///steps a_phi_out from time to time+dt
   void step(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond);
+  void stepRK4(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond);
 
   ///forces a vector to match boundary conditions at boundary nodes
   void apply_boundary(vector<double>& a_phi, double time, const function<double(const Node &, double)>& a_boundary_cond);

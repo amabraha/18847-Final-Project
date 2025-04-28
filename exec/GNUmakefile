@@ -37,7 +37,9 @@ fesolver_TD.exe: GNUmakefile $(OBJS) FEMain_TD.cpp
 	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver_TD.exe FEMain_TD.cpp  $(OBJS)
 
 run_TD: fesolver_TD.exe 
-	rm -fr */*.vtk
+	rm -fr phi_output/ vtk_output/
+	mkdir phi_output
+	mkdir vtk_output
 	./fesolver_TD.exe ../FEData/td 0.05
 
 poly: fesolver.exe 

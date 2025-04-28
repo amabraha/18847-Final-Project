@@ -29,27 +29,71 @@ void FETimeDependent::apply_boundary(vector<double>& a_phi, double time, const f
 
 void FETimeDependent::step(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond)
 {
-  // apply_boundary(a_phi_out, time, a_boundary_cond);
+  apply_boundary(a_phi_out, time, a_boundary_cond);
 
   vector<double> rhs = vector<double>(a_phi_out.size());
-  //copy -m_L to A
+  //copy m_L to A
   SparseMatrix<double> A(m_L, 1);
 
   for (int i = 0; i < a_phi_out.size(); i ++)
   {
-    //for the rhs this constructs 1/dt phi(t) - f(t + dt)
+    //for the rhs this constructs 1/dt phi(t) + f(t + dt)
     rhs[i] = a_phi_out[i]/dt + m_f(time+dt)[i];
 
-    //this constructs 1/dt I - L
+    //this constructs 1/dt I + L
     array<int, 2> idx = {i, i};
     A[idx] += 1/dt;
   }
 
   JacobiSolver<double> solver;
+  // A.print();
   //ehh just picked 1000 and 1e-7 arbitrarily
   solver.solve(a_phi_out, A, rhs, 1E-8, 1000);
 
-  // apply_boundary(a_phi_out, time+dt, a_boundary_cond);
+  apply_boundary(a_phi_out, time+dt, a_boundary_cond);
+}
+
+void FETimeDependent::stepRK4(double time, double dt, vector<double>& a_phi_out, const function<double(const Node &, double)>& a_boundary_cond)
+{
+  apply_boundary(a_phi_out, time, a_boundary_cond);
+
+  vector<double> F1 = vector<double>(a_phi_out.size());
+  vector<double> F2 = vector<double>(a_phi_out.size());
+  vector<double> F3 = vector<double>(a_phi_out.size());
+  vector<double> F4 = vector<double>(a_phi_out.size());
+
+  vector<double> Lphi = m_L*a_phi_out;
+  //copy m_L to A
+  SparseMatrix<double> A(m_L, 1);
+
+  for (int i = 0; i < a_phi_out.size(); i ++)
+  {
+    F1[i] = m_f(time)[i] - Lphi[i];
+  }
+
+  vector<double> LF1 = m_L*F1;
+
+  for (int i = 0; i < a_phi_out.size(); i ++)
+  {
+    F2[i] = m_f(time + (dt/2))[i] - Lphi[i] - (dt/2)*LF1[i];
+  }
+
+  vector<double> LF2 = m_L*F2;
+
+  for (int i = 0; i < a_phi_out.size(); i ++)
+  {
+    F3[i] = m_f(time + (dt/2))[i] - Lphi[i] - (dt/2)*LF2[i];
+  }
+
+  vector<double> LF3 = m_L*F3;
+
+  for (int i = 0; i < a_phi_out.size(); i ++)
+  {
+    F4[i] = m_f(time + dt)[i] - Lphi[i] - dt*LF3[i];
+    a_phi_out[i] = a_phi_out[i] + (dt/6)*(F1[i] + 2*F2[i] + 2*F3[i] + F4[i]);
+  }
+
+  apply_boundary(a_phi_out, time+dt, a_boundary_cond);
 }
 
 void FETimeDependent::solve(double time, double dt, vector<double>& a_phi_out, 
@@ -68,11 +112,11 @@ void FETimeDependent::solve(double time, double dt, vector<double>& a_phi_out,
   {
     if (t + dt > time)
     {
-      step(t, time-t, a_phi_out, a_boundary_cond);
+      stepRK4(t, time-t, a_phi_out, a_boundary_cond);
       break;
     }
     t += dt;
-    step(t, dt, a_phi_out, a_boundary_cond);
+    stepRK4(t, dt, a_phi_out, a_boundary_cond);
   }
 }
 
