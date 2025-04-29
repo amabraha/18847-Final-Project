@@ -24,13 +24,13 @@ using std::vector;
 static auto Phi_exact = [](const array<double, DIM> &X) -> double
 {
     // smooth function that vanishes on the unit square boundary
-    return std::sin(M_PI * X[0]) * std::sin(M_PI * X[1]);
+    return X[0]*X[0]+X[1]*X[1];
 };
 
 static auto source2D = [](const array<double, DIM> &X) -> double
 {
     // −Δ Φ = 2π² Φ for the choice above
-    return 2.0 * M_PI * M_PI * Phi_exact(X);
+    return -4.0;
 };
 
 // mesh‑size estimate ----------------------------------------------------------
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
         // solve with Jacobi
         vector<double> phi;
         JacobiSolver<double> solver;
-        solver.solve(phi, A, rhs, 1e-8, 5000);
+        solver.solve(phi, A, rhs, 1e-8, 100000);
 
         // compute nodal max error
         double maxErr = 0.0;
@@ -113,6 +113,8 @@ int main(int argc, char **argv)
              << "   #tri=" << grid.getNumElts()
              << "   h=" << h
              << "   err=" << maxErr << "\n";
+        string filename = "solution"+to_string(L)+".vtk";
+        FEWrite(&grid, &phi, filename.c_str());
     }
 
     // print observed orders

@@ -68,7 +68,7 @@ fe2d_convergence.exe: GNUmakefile $(OBJS) FE2dConvergence.o
 
 # Run the convergence study on test.poly (initial max‐area=2, 4 levels)
 run2d: fe2d_convergence.exe
-	./fe2d_convergence.exe ../FEData/bicycle_seat 1.0 4
+	./fe2d_convergence.exe ../FEData/square 1.0 13
 
 #---------------------------------------------------------
 # convenience targets for data types
