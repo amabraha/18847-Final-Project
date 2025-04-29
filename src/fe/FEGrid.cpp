@@ -411,6 +411,8 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   free(out.triangleattributelist);
 };
 
+/** Gradient of linear basis function
+*/
 array<double, DIM> FEGrid::gradient(
     const int &a_eltNumber,
     const int &a_nodeNumber) const
@@ -436,7 +438,7 @@ array<double, DIM> FEGrid::gradient(
     }        
   if (DIM == 2) {
     // WARNING: the following calculation is correct for triangles in 2D *only*.
-    // Determinant (cross product magnitude, 2*area)
+    // Determinant (for calculating matrix inverse, 2*area)
     double det = dx[0][0]*dx[1][1] - dx[1][0]*dx[0][1];
     array<double, DIM> retval;
     // Solve for gradient
@@ -451,7 +453,7 @@ array<double, DIM> FEGrid::gradient(
     double det = dx[0][0]*(dx[1][1]*dx[2][2]-dx[1][2]*dx[2][1]) 
                 - dx[0][1]*(dx[1][0]*dx[2][2]-dx[1][2]*dx[2][0])
                 + dx[0][2]*(dx[1][0]*dx[2][1]-dx[1][1]*dx[2][0]);
-    // Solve for gradient in 3D
+    // Solve for gradient in 3D (compute inverse, multiply by -1)
     array<double, DIM> retval;
     retval[0] = (-(dx[1][1]*dx[2][2] - dx[1][2]*dx[2][1]) / det);
     retval[1] = (-(dx[1][0]*dx[2][2] - dx[1][2]*dx[2][0]) / det);

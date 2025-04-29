@@ -39,6 +39,7 @@ run: fesolver.exe
 	./fesolver.exe ../FEData/A
 	./fesolver.exe ../FEData/B.2
 
+# Usage: make extrude DIM=3
 extrude: fesolver.exe
 	$(MAKE) DIM=3 fesolver.exe
 	./fesolver.exe ../FEData/A --extrude
