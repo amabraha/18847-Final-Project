@@ -36,7 +36,12 @@ static auto source2D = [](const array<double, DIM> &X) -> double
 // mesh‑size estimate ----------------------------------------------------------
 static double estimate2Dh(const FEGrid &grid)
 {
-    double A = grid.elementArea(0); // first triangle area
+    double A = 0; // average triangle area
+    for (int i = 0; i < grid.getNumElts(); i++) {
+        A += grid.elementArea(i);
+    }
+    A /= grid.getNumElts();
+    cout << "A: " << A << endl;
     return 2.0 * std::sqrt(A);      // edge length of iso‑area square
 }
 
@@ -71,7 +76,9 @@ int main(int argc, char **argv)
 
     for (int L = 0; L < levels; ++L)
     {
-        double max_area = A0 / std::pow(2.0, L);
+        double max_area = A0 / std::pow(2, L);
+
+        cout << "max_area: " << max_area << endl;
 
         // build 2‑D mesh via Triangle (no extrusion when DIM=2)
         FEGrid grid(prefix + ".poly", max_area);
@@ -113,7 +120,7 @@ int main(int argc, char **argv)
     for (int i = 1; i < static_cast<int>(hs.size()); ++i)
     {
         double p = std::log(errs[i - 1] / errs[i]) / std::log(hs[i - 1] / hs[i]);
-        cout << "  between lvl " << (i - 1) << "→" << i << " : p ≈ " << p << "\n";
+        cout << "  between lvl " << (i - 1) << "->" << i << " : p ≈ " << p << "\n";
     }
     return 0;
 }

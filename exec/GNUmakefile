@@ -65,6 +65,10 @@ run3d: fe3d_convergence.exe
 fe2d_convergence.exe: GNUmakefile $(OBJS) FE2dConvergence.o
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o $@ FE2dConvergence.o $(OBJS)
 
+# Run the convergence study on test.poly (initial max‐area=2, 4 levels)
+run2d: fe2d_convergence.exe
+	./fe2d_convergence.exe ../FEData/bicycle_seat 1.0 4
+
 #---------------------------------------------------------
 # convenience targets for data types
 run_float:

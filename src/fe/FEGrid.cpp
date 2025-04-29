@@ -152,10 +152,10 @@ FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFi
 };
 
 /**
-#1 Integrate Triangle:
-Read the .poly file for nodes, segments
-call triangle to generate nodes and elements
-initialize nodes and elements
+  #1 Integrate Triangle:
+  Read the .poly file for nodes, segments
+  call triangle to generate nodes and elements
+  initialize nodes and elements
 */
 FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
 {
@@ -167,14 +167,13 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   if (!poly) 
   {
       std::cout << "Error: File does not exist or failed to open: " << a_polyFileName << std::endl;
-      return;
+      exit(1);
   }
 
   // Read the vertices: build up pointlist
   // header of poly file
   int ncount, dim, attributes, boundaryMarkers;
-  poly>>ncount>>dim>>attributes>>boundaryMarkers;
-
+  poly >> ncount >> dim >> attributes >> boundaryMarkers;
   // initialize data structures
   in.numberofpoints = ncount;
   in.numberofpointattributes = attributes;
@@ -199,30 +198,31 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
     {
       int vertex;
       double x, y;
-      poly>>vertex>>x>>y;
+      poly >> vertex >> x >> y;
       vertex--;
       // read position
-      in.pointlist[vertex*2] = x;
-      in.pointlist[vertex*2+1] = y;
+      in.pointlist[vertex * 2] = x;
+      in.pointlist[vertex * 2 + 1] = y;
 
       // read attributes
       for (int j = 0; j < in.numberofpointattributes; j++)
       {
-        poly>>in.pointattributelist[vertex*in.numberofpointattributes + j];
+        poly >> in.pointattributelist[vertex*in.numberofpointattributes + j];
       }
 
       // read boundary marker
       if (boundaryMarkers > 0) {
-        poly>>in.pointmarkerlist[vertex];
+        poly >> in.pointmarkerlist[vertex];
       }
     }
+  
 
   in.trianglelist = (int *) NULL;
   
   // Read the segments: build up segment list
   int segcount, segboundaryMarkers;
   // header
-  poly>>segcount>>segboundaryMarkers;
+  poly >> segcount >> segboundaryMarkers;
   // initialize data structures
   in.numberofsegments = segcount;
   in.segmentlist = (int *) malloc(in.numberofsegments * 2 * sizeof(int));
@@ -236,36 +236,43 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   for(int i=0; i<segcount; i++)
     {
       int segID, endpoint1, endpoint2;
-      poly>>segID>>endpoint1>>endpoint2;
+      poly >> segID >> endpoint1 >> endpoint2;
       segID--;
       // read boundary marker
       if (segboundaryMarkers > 0) {
-        poly>>in.segmentmarkerlist[segID];
+        poly >> in.segmentmarkerlist[segID];
       }
       // read segment endpoints (node ID)
-      in.segmentlist[segID*2] = endpoint1;
-      in.segmentlist[segID*2+1] = endpoint2;
+      in.segmentlist[segID * 2] = endpoint1;
+      in.segmentlist[segID * 2 + 1] = endpoint2;
     }
   
   // Read the holes
   int holecount;
-  poly>>holecount;
+  // header
+  poly >> holecount;
   in.numberofholes = holecount;
+  // body
   if (in.numberofholes > 0)
   {
     in.holelist = (REAL *)malloc(in.numberofholes * 2 * sizeof(REAL));
-    for(int i=0; i<holecount; i++)
+    for(int i = 0; i < holecount; i++)
       {
         int holeID;
         REAL x, y;
-        poly>>holeID>>x>>y;
+        poly >> holeID >> x >> y;
         holeID--;
-        in.holelist[holeID*2] = x;
-        in.holelist[holeID*2+1] = y;
+        in.holelist[holeID * 2] = x;
+        in.holelist[holeID * 2 + 1] = y;
       }
   }
+  else {
+    in.holelist = (REAL *) NULL; 
+  }
 
-  // assumes fixed max area, no regional attributes and/or area constraints in .poly
+  // Assumed fixed max area, no regional attributes and/or area constraints in .poly
+  in.numberofregions = 0;
+  in.regionlist = (REAL *) NULL;
 
   /* Make necessary initializations so that Triangle can return a */
   /*   triangulation in `out'.                                    */
@@ -281,7 +288,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   /* Refine the triangulation according to the attached */
   /*   triangle area constraints.                       */
   char switches[20];
-  snprintf(switches, sizeof(switches), "pq34a%f", max_area);
+  snprintf(switches, sizeof(switches), "pqa%f", max_area);
   triangulate(switches, &in, &out, (struct triangulateio *) NULL);
 
   // Read nodes from pointlist
