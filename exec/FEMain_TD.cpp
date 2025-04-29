@@ -11,14 +11,14 @@ using namespace std;
 //our reference phi
 double sourcePhi(double time, array<double, DIM> x)
 {
-  return 2*x[0]+x[1]+3*time;
+  return 2*x[0]+x[1]+3.0*sin(time);
 
 }
 
 double derivedf(double time, array<double, DIM> x)
 {
   //want to return d^2phi/dx^2 + d^2phi/dy^2 + dphi/dt
-  return 0+3;
+  return 3.0*cos(time);
 }
 
 
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
   vector<double> phi_nodes;
 
-  double timestep = .005;
+  double timestep = .01;
   double finaltime = 8;
 
   TDsolver.solve_write(finaltime, timestep, phi_nodes, initial_conditions, boundary_cond, "vtk_output/solution");
