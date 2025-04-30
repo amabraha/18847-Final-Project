@@ -24,6 +24,7 @@ using std::vector;
 static auto Phi_exact = [](const array<double, DIM> &X) -> double
 {
     // smooth function that vanishes on the unit square boundary
+    // return 2*X[0]+X[1];
     return X[0]*X[0]+X[1]*X[1];
 };
 

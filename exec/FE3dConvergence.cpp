@@ -15,7 +15,7 @@ static auto Phi_exact = [](const array<double, DIM> &X) -> double
 };
 static auto source3D = [](const array<double, DIM> &X) -> double
 {
-    return -3.0 * M_PI * M_PI * Phi_exact(X); // -ΔΦ
+    return 3.0 * M_PI * M_PI * Phi_exact(X); // -ΔΦ
 };
 
 // -----------------------------------------------------------------------------

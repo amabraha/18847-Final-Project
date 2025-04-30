@@ -356,7 +356,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
         int v4_id = add_upper_node(v1, h);
         int v5_id = add_upper_node(v2, h);
         int v6_id = add_upper_node(v3, h);
-        cout << "v6 id " << v6_id << endl;
+        // cout << "v6 id " << v6_id << endl;
 
         // Divide into 3 tetras
         // ref: https://www.researchgate.net/publication/221561839_How_to_Subdivide_Pyramids_Prisms_and_Hexahedra_into_Tetrahedra

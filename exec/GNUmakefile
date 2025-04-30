@@ -5,8 +5,8 @@ HOME = ./..
 # include the common rules from project root
 include $(HOME)/GNUmakefile
 
-CFLAGS   += -O3
-#CFLAGS   += -g
+# CFLAGS   += -O3
+CFLAGS   += -g
 
 CXX       = g++
 #CXX     = clang++
@@ -42,7 +42,7 @@ run: fesolver.exe
 # Usage: make extrude DIM=3
 extrude: fesolver.exe
 	$(MAKE) DIM=3 fesolver.exe
-	./fesolver.exe ../FEData/A --extrude
+	./fesolver.exe ../FEData/square 0.5 --extrude
 
 poly: fesolver.exe
 	./fesolver.exe ../FEData/test 2
@@ -59,7 +59,7 @@ fe3d_convergence.exe: $(HOME)/GNUmakefile $(OBJS) FE3dConvergence.o
 
 # Run the convergence study on test.poly (initial max‐area=2, 4 levels)
 run3d: fe3d_convergence.exe
-	./fe3d_convergence.exe ../FEData/test 2 4
+	./fe3d_convergence.exe ../FEData/square 1.0 6
 
 # ---------------------------------------------------------
 # **2-D convergence study  <--- add this block**

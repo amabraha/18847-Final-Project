@@ -5,16 +5,9 @@
 #include <array>
 using namespace std;
 
-float sourceFunction(array<double, DIM> x)
+float sourceFunction(array<double, DIM> X)
 {
-  double val = -0.2;
-  // region 1
-  float Rsquared = (x[1] - 9) * (x[1] - 9) + x[0] * x[0];
-  if (Rsquared > 25 && Rsquared < 36)
-  {
-    val = 1.5;
-  }
-  return val;
+  return X[0]*X[0]+X[1]*X[1];
 }
 
 int main(int argc, char **argv)
@@ -29,7 +22,7 @@ int main(int argc, char **argv)
 
   string prefix(argv[1]);
   bool extrude = false;
-  double max_area = -1.0;
+  double max_area = 2.0;
 
   if (argc >= 3) {
     string arg2 = argv[2];
@@ -37,6 +30,15 @@ int main(int argc, char **argv)
       extrude = true;
     } else {
       max_area = stod(arg2);
+    }
+  }
+
+  if (argc == 4) {
+    string arg3 = argv[3];
+    if (arg3 == "--extrude") {
+      extrude = true;
+    } else {
+      max_area = stod(arg3);
     }
   }
 
