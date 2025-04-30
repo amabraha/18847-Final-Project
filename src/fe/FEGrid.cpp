@@ -324,7 +324,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   if (DIM == 3)
   {
     // Add new elements for 3d extrusion
-    m_elements.resize(ncell * 1);
+    m_elements.resize(ncell * 3);
   }
   for(int i = 0; i < ncell; i++)
     {
@@ -380,9 +380,9 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
         tet3[3] = v6_id;
 
         // Add all tetras
-        m_elements[cellID] = Element(tet1);
-        // m_elements[cellID * 3 + 1] = Element(tet2);
-        // m_elements[cellID * 3 + 2] = Element(tet3);
+        m_elements[cellID * 3] = Element(tet1);
+        m_elements[cellID * 3 + 1] = Element(tet2);
+        m_elements[cellID * 3 + 2] = Element(tet3);
       }
       else {
         m_elements[cellID] = Element(vert);
