@@ -337,8 +337,6 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
       // 2d extrude into 3d, grow a prism layer and split into 3 tetras
       if (DIM == 3) 
       {
-        int vertex = m_nodes.size();
-        m_nodes.resize(vertex + 3);
         Node v1 = m_nodes[vert[0]];
         Node v2 = m_nodes[vert[1]];
         Node v3 = m_nodes[vert[2]];
@@ -621,6 +619,9 @@ const char *FEWrite(FEGrid *a_grid, vector<double> *a_scalarField, const char *a
       else {
         pts[p + 2] = x[2];
       }
+      cout << "x[0] " << x[0] << endl;
+      cout << "x[1] " << x[1] << endl;
+      cout << "x[2] " << x[2] << endl;
     }
 
   int ncell = a_grid->getNumElts();
