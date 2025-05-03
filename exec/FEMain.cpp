@@ -34,12 +34,11 @@ int main(int argc, char **argv)
   {
     string nodeFile = prefix+".node";
     string eleFile  = prefix+".ele";
-
     grid = FEGrid(nodeFile, eleFile);
   } else
   {
     string polyFile = prefix+".poly";
-    
+    double max_area = stod(argv[2]);
     grid = FEGrid(polyFile, max_area);
   }
 

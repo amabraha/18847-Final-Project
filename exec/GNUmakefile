@@ -39,11 +39,23 @@ run: fesolver.exe
 	./fesolver.exe ../FEData/A
 	./fesolver.exe ../FEData/B.2
 
+#---------------------------------------------------------
+# Time-dependent solver
+fesolver_TD.exe: GNUmakefile $(OBJS) FEMain_TD.cpp
+	  $(CXX) $(CPPFLAGS) $(CFLAGS) -o fesolver_TD.exe FEMain_TD.cpp  $(OBJS)
+
+run_TD: fesolver_TD.exe 
+	rm -fr */*.vtk
+	./fesolver_TD.exe ../FEData/td 0.05
+
+#---------------------------------------------------------
+# 3D extrusion
 # Usage: make extrude DIM=3
 extrude: fesolver.exe
-	$(MAKE) DIM=3 fesolver.exe
 	./fesolver.exe ../FEData/square 0.5
 
+#---------------------------------------------------------
+# Triangle integration
 poly: fesolver.exe
 	./fesolver.exe ../FEData/test 2
 

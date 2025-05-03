@@ -21,6 +21,36 @@ SparseMatrix<T>::SparseMatrix(int a_m, int a_n)
   m_colIndex.resize(a_m);
 }
 
+
+template <typename T>
+SparseMatrix<T>::SparseMatrix(const SparseMatrix<T> &M)
+{
+  m_m = M.m_m;
+  m_n = M.m_n;
+  m_zero = T(0);
+  m_data = M.m_data;
+  m_colIndex = M.m_colIndex;
+}
+
+
+template <typename T>
+SparseMatrix<T>::SparseMatrix(const SparseMatrix<T> &M, T k)
+{
+  m_m = M.m_m;
+  m_n = M.m_n;
+  m_zero = T(0);
+  m_colIndex = M.m_colIndex;
+  m_data = M.m_data;
+
+  for (int row = 0; row < m_m; row ++)
+    {
+      for (int col = 0; col < m_colIndex[row].size(); col ++)
+        {
+          m_data[row][col] = M.m_data[row][col] * k;
+        }
+    }
+}
+
 template <typename T>
 vector<T> SparseMatrix<T>::operator*(const vector<T> &a_v) const
 {
@@ -61,6 +91,12 @@ T &SparseMatrix<T>::operator[](array<int, 2> &a_index)
 }
 
 template <typename T>
+T& SparseMatrix<T>::access(array<int, 2> a_index)
+{
+  return (*this)[a_index];
+}
+
+template <typename T>
 const T &SparseMatrix<T>::operator[](array<int, 2> &a_index) const
 {
   int row = a_index[0];
@@ -78,6 +114,12 @@ const T &SparseMatrix<T>::operator[](array<int, 2> &a_index) const
 
   // since we aren't modifying our sparse matrix, just return 0.0
   return m_zero;
+}
+
+template <typename T>
+const T& SparseMatrix<T>::access(array<int, 2> a_index) const
+{
+  return (*this)[a_index];
 }
 
 template <typename T>
@@ -184,8 +226,8 @@ template <typename T>
 void SparseMatrix<T>::zeroRow(int r)
 {
   assert(r >= 0 && r < static_cast<int>(m_m));
-  m_data[r] = vector<T>();
-  m_colIndex[r] = vector<int>();
+  m_colIndex[r] = vector<int>(0);
+  m_data[r] = vector<T>(0);
 }
 
 // Explicit template instantiations

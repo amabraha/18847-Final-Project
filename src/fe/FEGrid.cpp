@@ -215,7 +215,6 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
         poly >> in.pointmarkerlist[vertex];
       }
     }
-  
 
   in.trianglelist = (int *) NULL;
   

@@ -15,6 +15,12 @@ public:
   SparseMatrix();
   SparseMatrix(int a_M, int a_N);
 
+  /// copy constructor
+  SparseMatrix(const SparseMatrix &M);
+
+  /// copy constructor with a multiplier of k
+  SparseMatrix(const SparseMatrix &M, T k);
+
   /// Matrix Vector multiply.  a_v.size()==N, returns vector of size M
   /**
       Important: you should be able to perform matrix-vector multiplication by
@@ -34,10 +40,12 @@ public:
     row of the array to find the element. You should be able to create a new
     element of the array using push_back, in light of the comment above.
   */
-  T &operator[](array<int, 2> &a_index);
+  T& operator[](array<int, 2>& a_index);
+  T& access(array<int, 2> a_index);
 
-  /// accessor function just to get a value
-  const T &operator[](array<int, 2> &a_index) const;
+  ///accessor function just to get a value
+  const T& operator[](array<int, 2>& a_index) const;
+  const T& access(array<int, 2> a_index) const;
 
   /// zero out all the elements, but leave the sparse structure in place.
   void zero();
