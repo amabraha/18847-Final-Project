@@ -18,6 +18,7 @@ public:
   FEGrid();
   /// Constructor by reading from file.
   FEGrid(const std::string& nodeFile, const std::string& a_elementFileName);
+  FEGrid(const std::string& a_polyFileName, const double max_area);
 
   /// Compute gradient of basis function at node a_nodeNumber = 0,..,DIM on element a_eltNumber.
   array<double, DIM> gradient(
@@ -39,6 +40,7 @@ public:
   const Element& element(int i) const;
   /// Access a node by indexing into m_nodes.
   const Node& node(int i) const;
+  int add_upper_node(const Node &node, double height);
   private:                            
   vector<Node > m_nodes;
   vector<Element > m_elements;

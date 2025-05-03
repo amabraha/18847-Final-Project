@@ -1,6 +1,6 @@
 #ifndef _ELEMENT_H_
 #define _ELEMENT_H_
-#define VERTICES 3
+#define VERTICES (DIM+1)
 #include <array>
 using namespace std;
 /// A Class describing a triangular element in 2D. 

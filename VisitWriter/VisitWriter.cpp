@@ -82,6 +82,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>
  
 #include "VisitWriter.H"
  
@@ -805,14 +806,15 @@ void write_unstructured_mesh(const char *filename, int ub, int npts,
     char  str[128];
     int   conn_size = 0;
     int  *curr_conn = conn;
- 
+    
     useBinary = ub;
     open_file(filename);
     write_header();
- 
     write_string("DATASET UNSTRUCTURED_GRID\n");
+    
     snprintf(str, 128,"POINTS %d float\n", npts);
     write_string(str);
+    
     for (i = 0 ; i < 3*npts ; i++)
     {
         write_float(pts[i]);
