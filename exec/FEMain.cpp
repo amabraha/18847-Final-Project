@@ -13,7 +13,7 @@ float sourceFunction(array<double, DIM> X)
 int main(int argc, char **argv)
 {
   // Parse command line arguments
-  if(argc < 2 || argc > 3)
+  if(argc < 1 || argc > 3)
     {
       cout << "Usage:" << endl;
       cout << "  " << argv[0] << " <prefix> [max_area]" << endl;
@@ -21,12 +21,6 @@ int main(int argc, char **argv)
     }
 
   string prefix(argv[1]);
-  double max_area = 2.0;
-
-  if (argc >= 2) {
-    string arg2 = argv[2];
-    max_area = stod(arg2);
-  }
 
   // --- load mesh ---
   FEGrid grid;
