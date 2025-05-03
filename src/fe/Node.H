@@ -1,6 +1,5 @@
 #ifndef _NODE_H_
 #define _NODE_H_
-#define DIM 2
 #include <cstdio>
 #include <cmath>
 #include <cassert>

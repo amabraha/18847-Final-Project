@@ -5,39 +5,40 @@
 #include <array>
 using namespace std;
 
-float sourceFunction(array<double, DIM> x)
+float sourceFunction(array<double, DIM> X)
 {
-  double val = -0.2;
-  // region 1
-  float Rsquared = (x[1] - 9) * (x[1] - 9) + x[0] * x[0];
-  if (Rsquared > 25 && Rsquared < 36)
-  {
-    val = 1.5;
-  }
-  return val;
+  return X[0]*X[0]+X[1]*X[1];
 }
 
 int main(int argc, char **argv)
 {
-  if(argc > 3)
+  // Parse command line arguments
+  if(argc < 2 || argc > 3)
     {
-      cout << "this program takes one argument that is the .node and .ele OR .poly and max area";
-      cout << "file prefix"<<endl;
+      cout << "Usage:" << endl;
+      cout << "  " << argv[0] << " <prefix> [max_area]" << endl;
       return 1;
     }
-  FEGrid grid;
+
   string prefix(argv[1]);
+  double max_area = 2.0;
+
+  if (argc >= 2) {
+    string arg2 = argv[2];
+    max_area = stod(arg2);
+  }
+
+  // --- load mesh ---
+  FEGrid grid;
   if (argc == 2)
   {
     string nodeFile = prefix+".node";
     string eleFile  = prefix+".ele";
-
     grid = FEGrid(nodeFile, eleFile);
   } else
   {
     string polyFile = prefix+".poly";
     double max_area = stod(argv[2]);
-    
     grid = FEGrid(polyFile, max_area);
   }
 
@@ -66,7 +67,9 @@ int main(int argc, char **argv)
   auto Phi_omega = [](const Node &n) -> double
   {
     // example boundary condition:
-    return std::sin(M_PI * n.getPosition()[0]);
+    // return std::sin(M_PI * n.getPosition()[0]);
+    // exact boundary condition
+    return sourceFunction(n.getPosition());
   };
   op.applyDirichletBC(A, rhs, Phi_omega);
 

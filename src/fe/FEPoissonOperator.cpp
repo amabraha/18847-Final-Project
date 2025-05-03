@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <vector>
+#include <iostream>
 using namespace std;
 
 #include "Node.H"
@@ -53,6 +54,18 @@ FEPoissonOperator<T>::FEPoissonOperator(const FEGrid &a_grid)
                 m_matrix[idxT] = m_matrix[idx];
             }
         }
+    }
+
+    //apply boundary conditions to L
+    for (int i = 0; i < m_grid.getNumNodes(); ++i)
+    {
+        const Node &n = m_grid.node(i);
+        if (n.isInterior())
+            continue;
+
+        m_matrix.zeroRow(i); // wipe old Laplace row
+        array<int, 2> d = {i, i};
+        m_matrix[d] = T(1); // 1·φ_i = g
     }
 }
 
