@@ -152,10 +152,10 @@ FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFi
 };
 
 /**
-  #1 Integrate Triangle:
-  Read the .poly file for nodes, segments
-  call triangle to generate nodes and elements
-  initialize nodes and elements
+  Constructor to Integrate Triangle library
+  1. Read the .poly file for nodes, segments
+  2. call triangle to generate nodes and elements
+  3. initialize nodes and elements
 */
 FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
 {
@@ -437,25 +437,25 @@ array<double, DIM> FEGrid::gradient(
   if (DIM == 2) {
     // WARNING: the following calculation is correct for triangles in 2D *only*.
     // Determinant (for calculating matrix inverse, 2*area)
-    double det = dx[0][0]*dx[1][1] - dx[1][0]*dx[0][1];
+    double det = dx[0][0] * dx[1][1] - dx[1][0] * dx[0][1];
     array<double, DIM> retval;
     // Solve for gradient
-    retval[0] = (-(dx[1][1] - dx[0][1])/det);
-    retval[1] = (-(dx[1][0] - dx[0][0])/det);
+    retval[0] = (-(dx[1][1] - dx[0][1]) / det);
+    retval[1] = (-(dx[1][0] - dx[0][0]) / det);
     return retval;
   } 
   else {
     // Tetrahedrons in 3D
     assert(DIM==3);
     // Determinant (dot product, cross product, 6*volume)
-    double det = dx[0][0]*(dx[1][1]*dx[2][2]-dx[1][2]*dx[2][1]) 
-                - dx[0][1]*(dx[1][0]*dx[2][2]-dx[1][2]*dx[2][0])
-                + dx[0][2]*(dx[1][0]*dx[2][1]-dx[1][1]*dx[2][0]);
+    double det = dx[0][0] * (dx[1][1] * dx[2][2] - dx[1][2] * dx[2][1]) 
+               - dx[0][1] * (dx[1][0] * dx[2][2] - dx[1][2] * dx[2][0])
+               + dx[0][2] * (dx[1][0] * dx[2][1] - dx[1][1] * dx[2][0]);
     // Solve for gradient in 3D (compute inverse, multiply by -1)
     array<double, DIM> retval;
-    retval[0] = (-(dx[1][1]*dx[2][2] - dx[1][2]*dx[2][1]) / det);
-    retval[1] = (-(dx[1][0]*dx[2][2] - dx[1][2]*dx[2][0]) / det);
-    retval[2] = (-(dx[1][0]*dx[2][1] - dx[1][1]*dx[2][0]) / det);
+    retval[0] = (-(dx[1][1] * dx[2][2] - dx[1][2] * dx[2][1]) / det);
+    retval[1] = (-(dx[1][0] * dx[2][2] - dx[1][2] * dx[2][0]) / det);
+    retval[2] = (-(dx[1][0] * dx[2][1] - dx[1][1] * dx[2][0]) / det);
     return retval;
   }
 };
@@ -619,9 +619,6 @@ const char *FEWrite(FEGrid *a_grid, vector<double> *a_scalarField, const char *a
       else {
         pts[p + 2] = x[2];
       }
-      cout << "x[0] " << x[0] << endl;
-      cout << "x[1] " << x[1] << endl;
-      cout << "x[2] " << x[2] << endl;
     }
 
   int ncell = a_grid->getNumElts();

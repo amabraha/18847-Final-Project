@@ -13,38 +13,24 @@ float sourceFunction(array<double, DIM> X)
 int main(int argc, char **argv)
 {
   // Parse command line arguments
-  if(argc < 2 || argc > 4)
+  if(argc < 2 || argc > 3)
     {
       cout << "Usage:" << endl;
-      cout << "  " << argv[0] << " <prefix> [max_area] [--extrude]" << endl;
+      cout << "  " << argv[0] << " <prefix> [max_area]" << endl;
       return 1;
     }
 
   string prefix(argv[1]);
-  bool extrude = false;
   double max_area = 2.0;
 
-  if (argc >= 3) {
+  if (argc >= 2) {
     string arg2 = argv[2];
-    if (arg2 == "--extrude") {
-      extrude = true;
-    } else {
-      max_area = stod(arg2);
-    }
-  }
-
-  if (argc == 4) {
-    string arg3 = argv[3];
-    if (arg3 == "--extrude") {
-      extrude = true;
-    } else {
-      max_area = stod(arg3);
-    }
+    max_area = stod(arg2);
   }
 
   // --- load mesh ---
   FEGrid grid;
-  if (argc == 2 || (argc == 3 && extrude))
+  if (argc == 2)
   {
     string nodeFile = prefix+".node";
     string eleFile  = prefix+".ele";

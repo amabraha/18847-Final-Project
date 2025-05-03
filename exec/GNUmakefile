@@ -42,7 +42,7 @@ run: fesolver.exe
 # Usage: make extrude DIM=3
 extrude: fesolver.exe
 	$(MAKE) DIM=3 fesolver.exe
-	./fesolver.exe ../FEData/square 0.5 --extrude
+	./fesolver.exe ../FEData/square 0.5
 
 poly: fesolver.exe
 	./fesolver.exe ../FEData/test 2
@@ -58,8 +58,9 @@ fe3d_convergence.exe: $(HOME)/GNUmakefile $(OBJS) FE3dConvergence.o
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o $@ FE3dConvergence.o $(OBJS)
 
 # Run the convergence study on test.poly (initial max‐area=2, 4 levels)
+# Usage: make run3d DIM=3
 run3d: fe3d_convergence.exe
-	./fe3d_convergence.exe ../FEData/square 1.0 6
+	./fe3d_convergence.exe ../FEData/square 1 6
 
 # ---------------------------------------------------------
 # **2-D convergence study  <--- add this block**
@@ -68,7 +69,7 @@ fe2d_convergence.exe: GNUmakefile $(OBJS) FE2dConvergence.o
 
 # Run the convergence study on test.poly (initial max‐area=2, 4 levels)
 run2d: fe2d_convergence.exe
-	./fe2d_convergence.exe ../FEData/square 1.0 13
+	./fe2d_convergence.exe ../FEData/square 1.0 5
 
 #---------------------------------------------------------
 # convenience targets for data types

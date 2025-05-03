@@ -11,11 +11,11 @@ using namespace std;
 // Exact analytic solution Φ  and forcing  f = -ΔΦ
 static auto Phi_exact = [](const array<double, DIM> &X) -> double
 {
-    return sin(M_PI * X[0]) * sin(M_PI * X[1]) * sin(M_PI * X[2]);
+    return X[0] + X[1] + X[2];
 };
 static auto source3D = [](const array<double, DIM> &X) -> double
 {
-    return 3.0 * M_PI * M_PI * Phi_exact(X); // -ΔΦ
+    return 0.0; // -ΔΦ
 };
 
 // -----------------------------------------------------------------------------
@@ -79,12 +79,12 @@ int main(int argc, char **argv)
 
         vector<double> phi;
         JacobiSolver<double> solver;
-        solver.solve(phi, A, rhs, 1e-8, 5000);
+        solver.solve(phi, A, rhs, 1e-8, 10000);
 
         // infinity-norm error
         double maxErr = 0.0;
         for (int i = 0; i < grid.getNumNodes(); ++i)
-            maxErr = max(maxErr, fabs(phi[i] - Phi_exact(grid.node(i).getPosition())));
+            maxErr = max(maxErr, fabs((phi[i] - Phi_exact(grid.node(i).getPosition()))));
 
         double h = estimate3Dh(grid);
         hs.push_back(h);
