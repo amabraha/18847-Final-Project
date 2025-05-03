@@ -72,7 +72,7 @@ fe3d_convergence.exe: $(HOME)/GNUmakefile $(OBJS) FE3dConvergence.o
 # Run the convergence study on test.poly (initial max‐area=2, 4 levels)
 # Usage: make run3d DIM=3
 run3d: fe3d_convergence.exe
-	./fe3d_convergence.exe ../FEData/square 1 6
+	./fe3d_convergence.exe ../FEData/square 1 5
 
 # ---------------------------------------------------------
 # **2-D convergence study  <--- add this block**
