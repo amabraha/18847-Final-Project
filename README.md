@@ -49,7 +49,7 @@ make poly
 
 - `FEPoissonOperator`
 - `SparseMatrix` 
-- JacobiSolver
+- `JacobiSolver`
 
 ### Implementation approach
 
@@ -67,13 +67,13 @@ make poly
 
 ```cmd
 cd exec
-# test float
+
 make run_float
-# test double
+
 make run_double
-# test complex<float>
+
 make run_complex_float
-# test complex<double>
+
 make run_complex_double
 ```
 
@@ -249,6 +249,7 @@ dx \times \Delta\phi= \begin{pmatrix}
  -1
 \end{pmatrix}
 $$
+
 Then solve
 
 $$
@@ -267,7 +268,6 @@ Compute tetrahedron volume instead (value: determinant / 6).
 
 ```cmd
 cd exec
-# Specify DIM dynamically in command line, default 2D
 make extrude DIM=3
 ```
 
@@ -296,7 +296,6 @@ static auto source3D = [](const array<double, DIM> &X) -> double
 
 ```cmd
 cd exec
-# Set DIM dynamically in command line, default 2D
 make run3d DIM=3
 ```
 
