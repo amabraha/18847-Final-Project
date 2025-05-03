@@ -187,11 +187,11 @@ Final relative error **0.009**
 
 #### Computed solution
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfYBzsYOJaaEjqD7LET_nN3cdB49CPMv0aedlENSo0wCGb4teGyOfOmCJpkuY0dch1Q-tzyNKnP4pmfCHdxCgh78YjluZZjGhTr520iKv7N05yNCFcxzlXaPdRbjtCWKJ0rWUCICg=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfYBzsYOJaaEjqD7LET_nN3cdB49CPMv0aedlENSo0wCGb4teGyOfOmCJpkuY0dch1Q-tzyNKnP4pmfCHdxCgh78YjluZZjGhTr520iKv7N05yNCFcxzlXaPdRbjtCWKJ0rWUCICg=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 50%;" />
 
 #### Reference $\Phi$
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUds0QTJmjFJglo3jbwEWs_15iorc40i3qOMGlDKFU-dRlzRZNdDNQhFTLfmWKBIbJfjuj6J5fACKaR2lDz_YKKa0OGHuWf-w2Xai4DJYZYPXhpDtUSbevtYvvDBVlZzR6noDonO=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUds0QTJmjFJglo3jbwEWs_15iorc40i3qOMGlDKFU-dRlzRZNdDNQhFTLfmWKBIbJfjuj6J5fACKaR2lDz_YKKa0OGHuWf-w2Xai4DJYZYPXhpDtUSbevtYvvDBVlZzR6noDonO=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 50%;" />
 
 ### Example2: Simple time dependent $\Phi$
 
@@ -201,11 +201,11 @@ Final relative error **0.1385**
 
 #### Computed solution
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdmST2GKgVqCjTgVeWxI3gMmDfLocOCqeaDoRcj7tPdx_M-5XGwNxZhvK06qI4lf4gvFO4x1lqoz8SMJBIjsckjeBZVufSXT0ZKV5BhLGrVwX2_oGZD4fij8isYH5Ta4OJq0NkJSQ=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdmST2GKgVqCjTgVeWxI3gMmDfLocOCqeaDoRcj7tPdx_M-5XGwNxZhvK06qI4lf4gvFO4x1lqoz8SMJBIjsckjeBZVufSXT0ZKV5BhLGrVwX2_oGZD4fij8isYH5Ta4OJq0NkJSQ=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 50%;" />
 
 #### Reference $\Phi$
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfY8RRSd576iZCrPfGpEeAW-IUnNmm5XIFbbKfRtQcDrI6NlyEpgHPhqtkwmRh38tcjSpSS0gFECkCaFRCo7BZwGgQgT_Hw_r32OffX839DsnECyqNQxXgdejLTbT-_U1dyEVpoDw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfY8RRSd576iZCrPfGpEeAW-IUnNmm5XIFbbKfRtQcDrI6NlyEpgHPhqtkwmRh38tcjSpSS0gFECkCaFRCo7BZwGgQgT_Hw_r32OffX839DsnECyqNQxXgdejLTbT-_U1dyEVpoDw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 50%;" />
 
 ### Example3: More complex time dependent $\Phi$
 
@@ -215,11 +215,11 @@ Final relative error **0.1057**
 
 #### Computed solution
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdTUwBYANthIlp-lixqOsPAkF-Pn2IwiqCjcEaEnkNN-Ny9nR2fq61dZIp0YTrMnQI0XFAvC79fP1Brx1dIlYamqgEuGUfRrZOZkWqBzGiBkyyuiD_3DrKoN7ANnCymOQdgfA4gUw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdTUwBYANthIlp-lixqOsPAkF-Pn2IwiqCjcEaEnkNN-Ny9nR2fq61dZIp0YTrMnQI0XFAvC79fP1Brx1dIlYamqgEuGUfRrZOZkWqBzGiBkyyuiD_3DrKoN7ANnCymOQdgfA4gUw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 50%;" />
 
 #### Reference $\Phi$
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUe95jeM1N0aw9FBCBhkrviJZSHoaFv6ZbUribQLpyrpiAQxdJEvn_azqfRz6NYdL5fTZrXv05z2a5u-wdiraBnb-dxJjUeXCKc6RkkrA3nQ-ckyp1fdzP-2TgamOeZcuiJvuIm2ag=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUe95jeM1N0aw9FBCBhkrviJZSHoaFv6ZbUribQLpyrpiAQxdJEvn_azqfRz6NYdL5fTZrXv05z2a5u-wdiraBnb-dxJjUeXCKc6RkkrA3nQ-ckyp1fdzP-2TgamOeZcuiJvuIm2ag=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 50%;" />
 
 ## 7. Create time-dependent animations of interesting source terms and boundary conditions
 
