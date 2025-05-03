@@ -12,7 +12,7 @@ Yao Xiao (<yaox3@andrew.cmu.edu>)
 
 - Scan .poly file
 
-- Call triangulate() from Triangle library (written in **C**) to refine triangulation with specified area constraint
+- Call `triangulate()` from Triangle library (written in **C**) to refine triangulation with specified area constraint
 
   ```c
   extern “C”
@@ -37,7 +37,7 @@ make poly
 
 ### Key changes required
 
-- Converted classes to template <typename T>
+- Converted classes to template \<typename T>
 
 - Modified member variables and method signatures to use type T
 
@@ -47,15 +47,15 @@ make poly
 
 ### Modified core classes
 
-- FEPoissonOperator
-- SparseMatrix 
+- `FEPoissonOperator`
+- `SparseMatrix` 
 - JacobiSolver
 
 ### Implementation approach
 
 - Separated declarations (.H) from implementations (.hpp)
 
-- Added necessary header includes (e.g., <complex>)
+- Added necessary header includes (e.g., \<complex>)
 
 ### Testing
 
@@ -145,11 +145,13 @@ make run2d
 
 ### Results
 
-> Estimated order p:
->   between lvl 0->1 : p ≈ 2
->   between lvl 1->2 : p ≈ 2
->   between lvl 2->3 : p ≈ 0.265492
->   between lvl 3->4 : p ≈ 2.68471
+```
+Estimated order p:
+between lvl 0->1 : p ≈ 2
+between lvl 1->2 : p ≈ 2
+between lvl 2->3 : p ≈ 0.265492
+between lvl 3->4 : p ≈ 2.68471
+```
 
 ## 5. Implement a time-dependent FEM solver (Alan)
 
@@ -185,11 +187,11 @@ Final relative error **0.009**
 
 #### Computed solution
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfYBzsYOJaaEjqD7LET_nN3cdB49CPMv0aedlENSo0wCGb4teGyOfOmCJpkuY0dch1Q-tzyNKnP4pmfCHdxCgh78YjluZZjGhTr520iKv7N05yNCFcxzlXaPdRbjtCWKJ0rWUCICg=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom:50%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfYBzsYOJaaEjqD7LET_nN3cdB49CPMv0aedlENSo0wCGb4teGyOfOmCJpkuY0dch1Q-tzyNKnP4pmfCHdxCgh78YjluZZjGhTr520iKv7N05yNCFcxzlXaPdRbjtCWKJ0rWUCICg=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
 
 #### Reference $\Phi$
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUds0QTJmjFJglo3jbwEWs_15iorc40i3qOMGlDKFU-dRlzRZNdDNQhFTLfmWKBIbJfjuj6J5fACKaR2lDz_YKKa0OGHuWf-w2Xai4DJYZYPXhpDtUSbevtYvvDBVlZzR6noDonO=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom:50%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUds0QTJmjFJglo3jbwEWs_15iorc40i3qOMGlDKFU-dRlzRZNdDNQhFTLfmWKBIbJfjuj6J5fACKaR2lDz_YKKa0OGHuWf-w2Xai4DJYZYPXhpDtUSbevtYvvDBVlZzR6noDonO=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
 
 ### Example2: Simple time dependent $\Phi$
 
@@ -199,11 +201,11 @@ Final relative error **0.1385**
 
 #### Computed solution
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdmST2GKgVqCjTgVeWxI3gMmDfLocOCqeaDoRcj7tPdx_M-5XGwNxZhvK06qI4lf4gvFO4x1lqoz8SMJBIjsckjeBZVufSXT0ZKV5BhLGrVwX2_oGZD4fij8isYH5Ta4OJq0NkJSQ=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom:50%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdmST2GKgVqCjTgVeWxI3gMmDfLocOCqeaDoRcj7tPdx_M-5XGwNxZhvK06qI4lf4gvFO4x1lqoz8SMJBIjsckjeBZVufSXT0ZKV5BhLGrVwX2_oGZD4fij8isYH5Ta4OJq0NkJSQ=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
 
 #### Reference $\Phi$
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfY8RRSd576iZCrPfGpEeAW-IUnNmm5XIFbbKfRtQcDrI6NlyEpgHPhqtkwmRh38tcjSpSS0gFECkCaFRCo7BZwGgQgT_Hw_r32OffX839DsnECyqNQxXgdejLTbT-_U1dyEVpoDw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom:50%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUfY8RRSd576iZCrPfGpEeAW-IUnNmm5XIFbbKfRtQcDrI6NlyEpgHPhqtkwmRh38tcjSpSS0gFECkCaFRCo7BZwGgQgT_Hw_r32OffX839DsnECyqNQxXgdejLTbT-_U1dyEVpoDw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
 
 ### Example3: More complex time dependent $\Phi$
 
@@ -213,11 +215,11 @@ Final relative error **0.1057**
 
 #### Computed solution
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdTUwBYANthIlp-lixqOsPAkF-Pn2IwiqCjcEaEnkNN-Ny9nR2fq61dZIp0YTrMnQI0XFAvC79fP1Brx1dIlYamqgEuGUfRrZOZkWqBzGiBkyyuiD_3DrKoN7ANnCymOQdgfA4gUw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom:50%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdTUwBYANthIlp-lixqOsPAkF-Pn2IwiqCjcEaEnkNN-Ny9nR2fq61dZIp0YTrMnQI0XFAvC79fP1Brx1dIlYamqgEuGUfRrZOZkWqBzGiBkyyuiD_3DrKoN7ANnCymOQdgfA4gUw=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
 
 #### Reference $\Phi$
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUe95jeM1N0aw9FBCBhkrviJZSHoaFv6ZbUribQLpyrpiAQxdJEvn_azqfRz6NYdL5fTZrXv05z2a5u-wdiraBnb-dxJjUeXCKc6RkkrA3nQ-ckyp1fdzP-2TgamOeZcuiJvuIm2ag=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom:50%;" />
+<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUe95jeM1N0aw9FBCBhkrviJZSHoaFv6ZbUribQLpyrpiAQxdJEvn_azqfRz6NYdL5fTZrXv05z2a5u-wdiraBnb-dxJjUeXCKc6RkkrA3nQ-ckyp1fdzP-2TgamOeZcuiJvuIm2ag=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 25%;" />
 
 ## 7. Create time-dependent animations of interesting source terms and boundary conditions
 
@@ -240,11 +242,22 @@ Solve linear system in 3D (inverse matrix: compute determinant, cofactors)
 
 We have
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUdt7rADim-nip5M2fclQcBw3jXGBr1aR8RYZWIDzXGaX5w_4G4NLQp5O30NbNqnsjd-1TUDPZDTzPI2P0VboDQz9E4E-ulkR_oLEdVpekJDDMeS1im-EUsazyNrWlV4yj3_OzxIAQ=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom:25%;" />
-
+$$
+dx \times \Delta\phi= \begin{pmatrix}
+ -1\\
+ -1\\
+ -1
+\end{pmatrix}
+$$
 Then solve
 
-<img src="https://lh7-rt.googleusercontent.com/slidesz/AGV_vUeZbZGhqeR5j6fc-A6xMiuPEmdUwPHhoDpvh4aGDAaPxsJvLw4hOwOeANMmGeRPV7AonweqUppzcYziquMBVadDE56tvg3jy0yCUYFaiS3GgEPQEsE8EVRrjoRa3SGdc_jaQIdUXg=s2048?key=BrZTxrthEqqZHSlVwKRtJ_Oe" alt="img" style="zoom: 50%;" />
+$$
+\Delta\phi= (dx)^{-1}\times \begin{pmatrix}
+ -1\\
+ -1\\
+ -1
+\end{pmatrix}
+$$
 
 ### **FEGrid::elementArea()**
 
@@ -254,7 +267,7 @@ Compute tetrahedron volume instead (value: determinant / 6).
 
 ```cmd
 cd exec
-# Specify DIM dynamically in command line
+# Specify DIM dynamically in command line, default 2D
 make extrude DIM=3
 ```
 
@@ -283,16 +296,19 @@ static auto source3D = [](const array<double, DIM> &X) -> double
 
 ```cmd
 cd exec
+# Set DIM dynamically in command line, default 2D
 make run3d DIM=3
 ```
 
 ### Results
 
-> Estimated order p:
->   between lvl 0→1 : p ≈ -0.0939246
->   between lvl 1→2 : p ≈ 1.39756
->   between lvl 2→3 : p ≈ 0.307041
->   between lvl 3→4 : p ≈ 0.413396
+```
+Estimated order p:
+between lvl 0→1 : p ≈ -0.0939246
+between lvl 1→2 : p ≈ 1.39756
+between lvl 2→3 : p ≈ 0.307041
+between lvl 3→4 : p ≈ 0.413396
+```
 
 ## References
 
