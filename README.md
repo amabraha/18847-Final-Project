@@ -4,7 +4,7 @@
  #### Myles Mwathe
  #### Yao Xiao
  
- 0. Use doxygen to create manual
+ 0. Use doxygen to create manual in `docs/`
 - To build, run `make docs` in `exec/`.
 - To clean up, run `make docs_clean` in `exec/`.
  

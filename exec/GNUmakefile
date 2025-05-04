@@ -1,7 +1,7 @@
 # exec/Makefile
 
 HOME = ./..
-DOXYGEN_OUTPUT_DIR = ./docs
+DOXYGEN_OUTPUT_DIR = $(HOME)/docs
 
 # include the common rules from project root
 include $(HOME)/GNUmakefile
@@ -105,7 +105,7 @@ run_complex_double:
 	$(CXX) -MM $(CFLAGS) $< > $*.d
 
 #---------------------------------------------------------
-# doxygen, generate docs in ./docs (DOXYGEN_OUTPUT_DIR)
+# doxygen, generate docs in ../docs (DOXYGEN_OUTPUT_DIR)
 docs:
 	doxygen $(HOME)/doxygen.config
 
