@@ -145,6 +145,11 @@ static void open_file(const char *filename)
     }
  
     fp = fopen(full_filename, "w+");
+    if (fp == NULL) {
+        perror("fopen failed");
+        fprintf(stderr, "Could not open file: %s\n", full_filename);
+        exit(EXIT_FAILURE);
+    }
 }
  
  
@@ -327,7 +332,7 @@ static void write_float(float val)
  * ************************************************************************* */
  
 static void write_header(void)
-{
+{   
     fprintf(fp, "# vtk DataFile Version 2.0\n");
     fprintf(fp, "Written using VisIt writer\n");
     if (useBinary)

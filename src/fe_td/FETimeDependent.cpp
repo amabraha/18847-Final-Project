@@ -81,7 +81,7 @@ void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_
 {
   //initialize our output to the initial condition
   a_phi_out.resize(a_initial_cond.size());
-  for (int i = 0; i < a_initial_cond.size(); i ++)
+  for (int i = 0; i < a_initial_cond.size(); i++)
   {
     a_phi_out[i] = a_initial_cond[i];
   }
@@ -104,7 +104,7 @@ void FETimeDependent::solve_write(double time, double dt, vector<double>& a_phi_
 
     //visit writing process
 
-    string filename = a_filename+to_string(file_counter)+".vtk";
+    string filename = a_filename + to_string(file_counter) + ".vtk";
     FEWrite(&m_grid, &a_phi_out, filename.c_str());
     file_counter += 1;
 

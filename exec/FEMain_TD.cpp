@@ -5,6 +5,7 @@
 #include "JacobiSolver.H"
 #include <iostream>
 #include <array>
+#include <filesystem>
 using namespace std;
 
 
@@ -98,9 +99,24 @@ int main(int argc, char** argv)
   double finaltime = 1;
   double timestep = .005;
 
+  string vtk_dir = "vtk_output";
+  string phi_dir = "phi_output";
+
+  // Create directories if they don't exist
+  if (!std::__fs::filesystem::exists(vtk_dir)) {
+      if (!std::__fs::filesystem::create_directory(vtk_dir)) {
+          cout << "Failed to create directory: " << vtk_dir << endl;
+          return 1;
+      }
+  }
+  if (!std::__fs::filesystem::exists(phi_dir)) {
+      if (!std::__fs::filesystem::create_directory(phi_dir)) {
+          cout << "Failed to create directory: " << phi_dir << endl;
+          return 1;
+      }
+  }
+
   TDsolver.solve_write(finaltime, timestep, phi_nodes, initial_conditions, boundary_cond, "vtk_output/solution");
-
-
 
   //error analysis using infinity norm
   double maxerr = 0.0;
@@ -149,7 +165,7 @@ int main(int argc, char** argv)
 
     //visit writing process
 
-    string filename = string("phi_output/solution")+to_string(file_counter)+".vtk";
+    string filename = string("phi_output/solution") + to_string(file_counter) + ".vtk";
     FEWrite(&grid, &phi_vector, filename.c_str());
     file_counter += 1;
 

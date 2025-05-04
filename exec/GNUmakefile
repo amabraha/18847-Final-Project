@@ -114,3 +114,4 @@ docs_clean:
 #---------------------------------------------------------
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe FE3dConvergence.o fe3d_convergence.exe FE2dConvergence.o FE2dConvergence.d  *.vtk
+	rm -fr ./phi_output ./vtk_output

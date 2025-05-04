@@ -31,6 +31,7 @@ int FEGrid::add_upper_node(const Node &node, double height)
   // Grow the layer
   x[0] = x_0[0];
   x[1] = x_0[1];
+  
   x[2] = x_0[2] + height;
 
   int in_id = -1;
@@ -116,7 +117,6 @@ FEGrid::FEGrid(const std::string &a_nodeFileName, const std::string &a_elementFi
       int v4_id = add_upper_node(v1, h);
       int v5_id = add_upper_node(v2, h);
       int v6_id = add_upper_node(v3, h);
-      // cout << "v4_id " << v4_id << endl;
 
       // Divide into 3 tetras
       // ref: https://www.researchgate.net/publication/221561839_How_to_Subdivide_Pyramids_Prisms_and_Hexahedra_into_Tetrahedra
@@ -295,7 +295,7 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   boundaryMarkers = (out.pointmarkerlist != NULL);
   m_nodes.resize(ncount);
   m_numInteriorNodes= 0;
-  for(int vertex=0; vertex<ncount; vertex++)
+  for(int vertex = 0; vertex < ncount; vertex++)
     {
       int type = out.pointmarkerlist[vertex];
       array<double, DIM> x;
@@ -353,7 +353,6 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
         int v4_id = add_upper_node(v1, h);
         int v5_id = add_upper_node(v2, h);
         int v6_id = add_upper_node(v3, h);
-        // cout << "v6 id " << v6_id << endl;
 
         // Divide into 3 tetras
         // ref: https://www.researchgate.net/publication/221561839_How_to_Subdivide_Pyramids_Prisms_and_Hexahedra_into_Tetrahedra
@@ -406,6 +405,9 @@ FEGrid::FEGrid(const std::string& a_polyFileName, const double max_area)
   free(out.pointattributelist);
   free(out.trianglelist);
   free(out.triangleattributelist);
+  free(out.pointmarkerlist);
+  free(out.segmentlist);
+  free(out.segmentmarkerlist);
 };
 
 /** Gradient of linear basis function
@@ -630,7 +632,7 @@ const char *FEWrite(FEGrid *a_grid, vector<double> *a_scalarField, const char *a
     cellType.resize(ncell, VISIT_TETRA);
   }
 
-  vector<int> conns(VERTICES*ncell);
+  vector<int> conns(VERTICES * ncell);
   for(int i = 0; i < ncell; i++)
     {
       array<int, VERTICES> vertices = a_grid->element(i).vertices();
