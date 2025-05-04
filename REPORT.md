@@ -165,6 +165,8 @@ Via backwards euler, so we get the recurrence
 
 $L$ is the finite element approximation of the laplacian (with boundary conditions)
 
+In the next sections, to run the time dependent FEM solver, run `make run_TD` in `exec/`. This will create a database of indexed visit files. The computed solution will be in `exec/vtk_output/solutionXXX.vtk` where `XXX` is the time index of the file. The reference $\Phi$ function that we use will be outputted in `exec/phi_output/solutionXXX.vtk`.
+
 ## 6. Verification of Time Dependent FEM Solver
 
 ### General idea
@@ -223,7 +225,11 @@ Final relative error **0.1057**
 
 ## 7. Create time-dependent animations of interesting source terms and boundary conditions
 
-TODO
+To create a time-dependent animation, run `make run_TD` in `exec/`. Then open visit and open the database in `exec/vtk_output/solutionXXX.vtk`. Then add the mesh and pseudocolor you want to see and use the next arrow to play the animation. For example, with the last example of $\Phi(x,y,t)=2x+y+3\sin t$, some snapshots are shown below:
+
+
+
+
 
 ## 8. Extrude the 2D elements into an extrusion into 3D (Yao)
 
