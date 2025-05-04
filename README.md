@@ -4,6 +4,9 @@
  #### Myles Mwathe
  #### Yao Xiao
  
+ 0. Use doxygen to create manual
+- To build, run `make docs` in `exec/`.
+- To clean up, run `make docs_clean` in `exec/`.
  
  1. Integrate Triangle into FEGrid
 - To test, run `make poly` in `exec/`.

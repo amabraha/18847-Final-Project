@@ -1,6 +1,8 @@
 #our makefile variables.   Good to place commonly changed variables
 # at the top of your makefile. Then follow with your rules.
 
+HOME = ./..
+
 FE_SRC = $(HOME)/src/fe
 SPMAT_SRC = $(HOME)/src/spmat
 VISIT_SRC = $(HOME)/VisitWriter
@@ -27,6 +29,7 @@ VISIT_OBJS := $(VISIT_SRC)/VisitWriter.o
 TRIANGLE_OBJS := $(TRIANGLE_SRC)/triangle.o
 OBJS = $(FE_OBJS) $(SPMAT_OBJS) $(VISIT_OBJS) $(TIME_DEPENDENT_OBJS) $(TRIANGLE_OBJS)
 
+# C compiler
 $(TRIANGLE_SRC)/triangle.o: $(TRIANGLE_SRC)/triangle.c $(TRIANGLE_SRC)/triangle.h
 	$(CC) $(TRILIBDEFS) -g -c -o $(TRIANGLE_SRC)/triangle.o \
 		$(TRIANGLE_SRC)/triangle.c

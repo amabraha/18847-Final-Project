@@ -1,6 +1,7 @@
 # exec/Makefile
 
 HOME = ./..
+DOXYGEN_OUTPUT_DIR = ./docs
 
 # include the common rules from project root
 include $(HOME)/GNUmakefile
@@ -31,7 +32,7 @@ else
 endif
 
 #---------------------------------------------------------
-# original 2D solver (unchanged)
+# Original 2D solver (unchanged)
 fesolver.exe: $(HOME)/GNUmakefile $(OBJS) FEMain.cpp
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o $@ FEMain.cpp $(OBJS)
 
@@ -69,17 +70,17 @@ FE3dConvergence.o: FE3dConvergence.cpp
 fe3d_convergence.exe: $(HOME)/GNUmakefile $(OBJS) FE3dConvergence.o
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o $@ FE3dConvergence.o $(OBJS)
 
-# Run the convergence study on test.poly (initial max‐area=2, 4 levels)
+# Run the convergence study on square.poly
 # Usage: make run3d DIM=3
 run3d: fe3d_convergence.exe
 	./fe3d_convergence.exe ../FEData/square 1 5
 
 # ---------------------------------------------------------
-# **2-D convergence study  <--- add this block**
+# 2-D convergence study
 fe2d_convergence.exe: GNUmakefile $(OBJS) FE2dConvergence.o
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -o $@ FE2dConvergence.o $(OBJS)
 
-# Run the convergence study on test.poly (initial max‐area=2, 4 levels)
+# Run the convergence study on square.poly
 run2d: fe2d_convergence.exe
 	./fe2d_convergence.exe ../FEData/square 1.0 5
 
@@ -103,6 +104,13 @@ run_complex_double:
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 	$(CXX) -MM $(CFLAGS) $< > $*.d
 
+#---------------------------------------------------------
+# doxygen, generate docs in ./docs (DOXYGEN_OUTPUT_DIR)
+docs:
+	doxygen $(HOME)/doxygen.config
+
+docs_clean:
+	rm -rf $(DOXYGEN_OUTPUT_DIR)
 #---------------------------------------------------------
 clean:
 	rm -fr $(OBJS) $(OBJS:.o=.d) *.exe FE3dConvergence.o fe3d_convergence.exe FE2dConvergence.o FE2dConvergence.d  *.vtk
