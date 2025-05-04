@@ -11,34 +11,13 @@ using namespace std;
 double sourcePhi(double time, array<double, DIM> x)
 {
   return 2*x[0]+x[1]+ 3*time;
-  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-  return Rsquared;
-  return Rsquared + 3*sin(time);
-  return 4.0*sin(5.0*Rsquared*sin(time));
 
 }
 
 double derivedf(double time, array<double, DIM> x)
 {
+  //d2phidx2 + d2phidy2 + dphidt;
   return 0+3;
-  double Rsquared = (x[1]-9)*(x[1]-9)+x[0]*x[0];
-  return 4;
-  return 4+3*cos(time);
-
-  //calculations for partials:
-  // dphi/dx = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)
-  // d^2phi/dx^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
-  
-  // dphi/dy = 4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)
-  // d^2phi/dy^2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time)
-
-  // dphi/dt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time)
-  double d2phidx2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*x[0]*sin(time)*5.0*2.0*x[0]*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
-  double d2phidy2 = -4.0*sin(5.0*Rsquared*sin(time))*5.0*2.0*(x[1]-9)*sin(time)*5.0*2.0*(x[1]-9)*sin(time)+4.0*cos(5.0*Rsquared*sin(time))*5.0*2.0*sin(time);
-  double dphidt = 4.0*cos(5.0*Rsquared*sin(time))*5.0*Rsquared*cos(time);
-
-  return d2phidx2 + d2phidy2 + dphidt;
-
 }
 
 
@@ -117,7 +96,7 @@ int main(int argc, char** argv)
   vector<double> phi_nodes;
 
   double finaltime = 1;
-  double timestep = .0005;
+  double timestep = .005;
 
   TDsolver.solve_write(finaltime, timestep, phi_nodes, initial_conditions, boundary_cond, "vtk_output/solution");
 
@@ -134,7 +113,6 @@ int main(int argc, char** argv)
       double newerr = abs(phi_nodes[nodeidx] - sourcePhi(finaltime, n.getPosition()));
       if (newerr > maxerr)
       {
-        cout << nodeidx << " " << n.getPosition()[0] << " " << n.getPosition()[1] << " " << newerr << endl;
         maxerr = newerr;
       }
     }
@@ -173,10 +151,6 @@ int main(int argc, char** argv)
 
     string filename = string("phi_output/solution")+to_string(file_counter)+".vtk";
     FEWrite(&grid, &phi_vector, filename.c_str());
-
-    filename = string("rhs_output/solution")+to_string(file_counter)+".vtk";
-    vector<double> rhs_vector = rhs_f(t);
-    FEWrite(&grid, &rhs_vector, filename.c_str());
     file_counter += 1;
 
   }
